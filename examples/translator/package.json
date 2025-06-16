@@ -1,0 +1,74 @@
+{
+  "name": "translator",
+  "publisher": "zgsm-ai",
+  "displayName": "翻译助手",
+  "icon": "images/translator.png",
+  "description": "翻译代码中的中文注释和字符串，支持中译英及英译中",
+  "version": "1.0.0",
+  "extensionType": "prompt",
+  "license": "Apache-2.0",
+  "engines": {
+    "name": "ai-prompt-shell",
+    "version": ">=1.0.0"
+  },
+  "contributes": {
+    "prompts": [
+      {
+        "name": "translate_zh_en",
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a helpful assistant that translates Chinese comments and strings in code to English."
+          },
+          {
+            "role": "user",
+            "content": "Translate the Chinese comments and strings in the following code to English."
+          }
+        ],
+        "support_scenes": [
+          "chat",
+          "completion",
+          "codereview"
+        ],
+        "parameters": {
+          "type": "object"
+        },
+        "returns": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "translate_en_zh",
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a helpful assistant that translates English comments and strings in code to Chinese."
+          },
+          {
+            "role": "user",
+            "content": "Translate the English comments and strings in the following code to Chinese."
+          }
+        ],
+        "support_scenes": [
+          "chat",
+          "completion",
+          "codereview"
+        ],
+        "parameters": {
+          "type": "object"
+        },
+        "returns": {
+          "type": "string"
+        }
+      }
+    ],
+    "languages": ["*"],
+    "dependences": [
+      {
+        "name": "context",
+        "version": "^1.2.0",
+        "failStrategy": "ignore"
+      }
+    ]
+  }
+}
