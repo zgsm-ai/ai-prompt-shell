@@ -2,9 +2,15 @@ package service
 
 import (
 	"ai-prompt-shell/dao"
+	"ai-prompt-shell/internal/utils"
+	"bytes"
+	"context"
+	"fmt"
 	"sync"
 	"text/template"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 type RenderStats struct {
@@ -18,6 +24,8 @@ type RenderStats struct {
 	RecentErrors  []error
 	mu            sync.RWMutex
 }
+
+type ToolExecutor func(args ...interface{}) (interface{}, error)
 
 type Renderer struct {
 	refreshInterval time.Duration
@@ -37,76 +45,93 @@ func NewRenderer() *Renderer {
 	}
 }
 
-func RenderPrompt(prompt_id string, variables map[string]interface{}) (string, error) {
-	// prompt, _ := prompts.Get(prompt_id)
-	// return prompt.Render(variables)
-
-	// 2. 渲染模板
-	// prompt, err := tmplManager.Render(promptID, req.Variables)
-	// if err != nil {
-	// 	if err == utils.ErrTemplateNotFound {
-	// 		c.JSON(http.StatusNotFound, gin.H{
-	// 			"error": "prompt template not found",
-	// 		})
-	// 	} else {
-	// 		c.JSON(http.StatusInternalServerError, gin.H{
-	// 			"error": "failed to render template",
-	// 		})
-	// 	}
-	// 	return
-	// }
-
-	// // 3. 调用LLM (重试2次)
-	// var resp llm.ChatCompletionResponse
-	// var lastErr error
-
-	// for i := 0; i < 3; i++ {
-	// 	if i > 0 {
-	// 		time.Sleep(time.Duration(i*100) * time.Millisecond)
-	// 	}
-
-	// 	llmReq := llm.ChatCompletionRequest{
-	// 		Model: req.Model,
-	// 		Messages: []llm.ChatMessage{
-	// 			{
-	// 				Role:    "user",
-	// 				Content: prompt,
-	// 			},
-	// 		},
-	// 	}
-
-	// 	resp, lastErr = llmClient.ChatCompletion(c.Request.Context(), llmReq)
-	// 	if lastErr == nil {
-	// 		break
-	// 	}
-	// }
-
-	// if lastErr != nil {
-	// 	c.JSON(http.StatusBadGateway, gin.H{
-	// 		"error":   "LLM服务不可用",
-	// 		"details": lastErr.Error(),
-	// 	})
-	// 	return
-	// }
-	return "", nil
+func constructContextData(variables map[string]interface{}) map[string]interface{} {
+	data := make(map[string]interface{})
+	for k, v := range env.All() {
+		data[k] = v
+	}
+	data["variables"] = variables
+	return data
 }
 
 func onRefreshTools() {
-	// for _, t := range registry.All() {
-	// 	//TODO:
-	// }
+	newFuncs := make(template.FuncMap)
+	for k, v := range registry.All() {
+		newFuncs[k] = newToolExecutor(&v)
+	}
+	renderer.funcMap = newFuncs
+}
+
+func newToolExecutor(t *dao.Tool) ToolExecutor {
+	return func(args ...interface{}) (interface{}, error) {
+		return Call(context.Background(), t, args)
+	}
 }
 
 func onRefreshPrompts() {
 	for key, content := range prompts.All() {
-		t, err := template.New(key).Funcs(renderer.funcMap).Parse(content.UserPrompt)
-		if err != nil {
+		if content.Prompt != "" {
+			key = key + ".prompt"
+			t, err := template.New(key).Funcs(renderer.funcMap).Parse(content.Prompt)
+			if err != nil {
+				continue
+			}
+			renderer.templates[key] = t
+		} else if content.Messages != nil {
+			for i, _ := range content.Messages {
+				msgkey := fmt.Sprintf("%s.messages.%d", key, i)
+				t, err := template.New(msgkey).Funcs(renderer.funcMap).Parse(content.Messages[i].Content)
+				if err != nil {
+					continue
+				}
+				renderer.templates[msgkey] = t
+			}
 			continue
+		} else {
+			logrus.Errorf("prompt %s is invalid", key)
 		}
-		renderer.templates[key] = t
 	}
 }
 
-func RefreshTool(t *dao.Tool) {
+func renderTemplate(templateKey string, variables map[string]interface{}) (string, error) {
+	t, ok := renderer.templates[templateKey]
+	if !ok {
+		return "", utils.ErrTemplateNotFound
+	}
+	var buf bytes.Buffer
+	err := t.Execute(&buf, constructContextData(variables))
+	if err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
 
+func renderMessages(prompt_id string, messages []dao.Message, variables map[string]interface{}) (interface{}, error) {
+	var results []dao.Message
+	for i, message := range messages {
+		content, err := renderTemplate(fmt.Sprintf("%s.messages.%d", prompt_id, i), variables)
+		if err != nil {
+			return []dao.Message{}, err
+		}
+		results = append(results, dao.Message{
+			Content: content,
+			Role:    message.Role,
+		})
+	}
+	return results, nil
+}
+
+func RenderPrompt(prompt_id string, variables map[string]interface{}) (string, interface{}, error) {
+	prompt, origin := prompts.Get(prompt_id)
+	if origin == dao.PromptOrigin_Notexist {
+		return "", "", utils.ErrTemplateNotFound
+	}
+	if prompt.Prompt != "" {
+		text, err := renderTemplate(prompt_id+".prompt", variables)
+		return "prompt", text, err
+	} else if prompt.Messages != nil {
+		messages, err := renderMessages(prompt_id, prompt.Messages, variables)
+		return "messages", messages, err
+	}
+	return "", "", utils.ErrTemplateNotFound
 }

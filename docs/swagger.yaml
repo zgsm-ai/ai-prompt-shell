@@ -58,7 +58,7 @@ definitions:
         items:
           type: string
         type: array
-      userPrompt:
+      prompt:
         type: string
     type: object
   dao.PromptExtension:

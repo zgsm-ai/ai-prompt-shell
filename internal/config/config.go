@@ -13,6 +13,7 @@ type Config struct {
 	Server   ServerConfig  `mapstructure:"SERVER"`
 	Redis    RedisConfig   `mapstructure:"REDIS"`
 	Refresh  RefreshConfig `mapstructure:"REFRESH"`
+	LLM      LLMConfig     `mapstructure:"LLM"`
 }
 
 type ServerConfig struct {
@@ -32,6 +33,11 @@ type RefreshConfig struct {
 	Extension time.Duration `mapstructure:"EXTENSION"`
 	Prompt    time.Duration `mapstructure:"PROMPT"`
 	Environ   time.Duration `mapstructure:"ENVIRON"`
+}
+
+type LLMConfig struct {
+	ApiKey  string `mapstructure:"API_KEY"`
+	ApiBase string `mapstructure:"API_BASE"`
 }
 
 var cfg *Config

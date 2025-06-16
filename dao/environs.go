@@ -28,8 +28,8 @@ func (c *Environments) Get(key string) (interface{}, bool) {
 	return val, ok
 }
 
-func (c *Environments) All() (map[string]interface{}, error) {
-	return c.environments, nil
+func (c *Environments) All() map[string]interface{} {
+	return c.environments
 }
 
 func (c *Environments) Keys() ([]string, error) {

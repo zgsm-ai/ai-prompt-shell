@@ -1,33 +1,44 @@
 package service
 
-type ChatModelParameters struct {
-	Model     string                 `json:"model"`
-	Variables map[string]interface{} `json:"variables"`
-}
+import (
+	"ai-prompt-shell/dao"
+	"context"
+)
 
-type ChatModelResponse struct {
-	Id      string `json:"id"`
-	Object  string `json:"object"`
-	Created int    `json:"created"`
-	Model   string `json:"model"`
-	Choices []struct {
-		Message struct {
-			Role    string `json:"role"`
-			Content string `json:"content"`
-		} `json:"message"`
-		FinishReason string `json:"finish_reason"`
-		Index        int    `json:"index"`
-		LogProbs     struct {
-		} `json:"logprobs"`
-	} `json:"choices"`
-	Usage struct {
-		PromptTokens     int `json:"prompt_tokens"`
-		CompletionTokens int `json:"completion_tokens"`
-		TotalTokens      int `json:"total_tokens"`
-	} `json:"usage"`
-}
+func ChatWithPrompt(promptId string, model string, variables map[string]interface{}) (ChatResponse, error) {
+	var resp ChatResponse
+	// 1. Render template
+	kind, data, err := RenderPrompt(promptId, variables)
+	if err != nil {
+		return resp, err
+	}
 
-func ChatWithPrompt(promptId string, model string, variables map[string]interface{}) (ChatModelResponse, error) {
+	// 3. Call LLM (Retry 2 times)
+	var lastErr error
+	var llmReq ChatRequest
+
+	if kind == "prompt" {
+		llmReq = ChatRequest{
+			Model: model,
+			Messages: []dao.Message{
+				{
+					Role:    "user",
+					Content: data.(string),
+				},
+			},
+		}
+	} else {
+		llmReq = ChatRequest{
+			Model:    model,
+			Messages: data.([]dao.Message),
+		}
+	}
+
+	resp, lastErr = llmClient.ChatCompletion(context.Background(), llmReq)
+
+	if lastErr != nil {
+		return resp, lastErr
+	}
 	//TODO:
-	return ChatModelResponse{}, nil
+	return resp, nil
 }

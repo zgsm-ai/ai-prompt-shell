@@ -10,6 +10,17 @@ type Tool struct {
 	Supports    []string               `json:"supports"`
 	Parameters  map[string]interface{} `json:"parameters"`
 	Returns     map[string]interface{} `json:"returns"`
+	Examples    []string               `json:"examples"`
+}
+
+type Restful struct {
+	Url    string `json:"url"`
+	Method string `json:"method"`
+}
+
+type Grpc struct {
+	Service string `json:"service"`
+	Method  string `json:"method"`
 }
 
 // ValidToolTypes 定义了有效的工具类型枚举

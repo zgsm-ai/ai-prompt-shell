@@ -227,8 +227,8 @@ Prompt类型扩展是扩展的一种，即PromptExtension，它是一个JSON对�
 |contributes | 扩展提供的能力 |
 |contributes.prompts| 扩展提供的Prompt模板形式的接口 |
 |contributes.prompts.name | 模板名称 |
-|contributes.prompts.messages | 模板需要渲染的内容，这个字段说明要渲染的是消息列表，这个字段和userPrompt互斥 |
-|contributes.prompts.userPrompt | 模板需要渲染的内容，这个字段说明要渲染的是用户请求文本串，这个字段和messages互斥 |
+|contributes.prompts.messages | 模板需要渲染的内容，这个字段说明要渲染的是消息列表，这个字段和prompt互斥 |
+|contributes.prompts.prompt | 模板需要渲染的内容，这个字段说明要渲染的是用户请求文本串，这个字段和messages互斥 |
 |contributes.prompts.supports | 模板支持的场景，目前支持chat、completion、codereview |
 |contributes.prompts.parameters | 用户向本接口发送请求的参数列表定义 |
 |contributes.prompts.returns | 本接口返回值列表定义 |
@@ -237,7 +237,7 @@ Prompt类型扩展是扩展的一种，即PromptExtension，它是一个JSON对�
 
 redis 'shenma:templates:'目录下，存储若干Prompt模板定义。
 
-Prompt模板即Prompt类型扩展中定义的'contributes.prompts'字段。狭义上，也可以特指'contributes.prompts.messages'字段和'contributes.prompts.userPrompt'字段。
+Prompt模板即Prompt类型扩展中定义的'contributes.prompts'字段。狭义上，也可以特指'contributes.prompts.messages'字段和'contributes.prompts.prompt'字段。
 
 ### 共享变量
 

@@ -32,7 +32,7 @@ type Prompt struct {
 	Name        string                 `json:"name" description:"Prompt模板名称"`
 	Description string                 `json:"description" description:"描述信息"`
 	Messages    []Message              `json:"messages,omitempty" description:"消息列表"`
-	UserPrompt  string                 `json:"userPrompt,omitempty" description:"用户提示词模板"`
+	Prompt      string                 `json:"prompt,omitempty" description:"用户提示词模板"`
 	Supports    []string               `json:"supports" description:"支持的场景"`
 	Parameters  map[string]interface{} `json:"parameters" description:"参数定义(JSON Schema)"`
 	Returns     map[string]interface{} `json:"returns" description:"返回值定义(JSON Schema)"`

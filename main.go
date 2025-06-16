@@ -26,10 +26,10 @@ func main() {
 
 	err := dao.InitRedis(cfg.Redis.Addr, cfg.Redis.Password, cfg.Redis.DB)
 	if err != nil {
-		log.Fatalf("Redis初始化失败: %v", err)
+		log.Fatalf("Redis initialization failed: %v", err)
 	}
-	if err := service.Init(); err != nil {
-		log.Fatalf("服务初始化失败: %v", err)
+	if err := service.Init(cfg); err != nil {
+		log.Fatalf("Service initialization failed: %v", err)
 	}
 	runHttpServer(&cfg.Server)
 }

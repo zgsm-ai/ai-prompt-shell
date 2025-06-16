@@ -2,28 +2,12 @@ package api
 
 import (
 	"net/http"
-	"time"
 
 	"ai-prompt-shell/dao"
-	"ai-prompt-shell/internal/llm"
-	"ai-prompt-shell/internal/template"
-	"ai-prompt-shell/internal/utils"
 	"ai-prompt-shell/service"
 
 	"github.com/gin-gonic/gin"
 )
-
-var (
-	tmplManager *template.Manager
-	llmClient   *llm.Client
-)
-
-// 初始化API模块
-func Init(redisAddr string, redisPassword string, redisDB int, llmBaseURL string, llmAPIKey string) error {
-	tmplManager = template.NewManager(30 * time.Minute)
-	llmClient = llm.NewClient(llmBaseURL, llmAPIKey)
-	return nil
-}
 
 // ListPrompts 列出所有Prompt模板
 // @Summary 获取所有Prompt模板
@@ -101,28 +85,29 @@ func RenderPrompt(c *gin.Context) {
 		return
 	}
 
-	// 1. 验证变量是否满足模板要求
-	// TODO: 需要根据模板定义检查必需变量
-
-	// 2. 渲染模板
-	result, err := tmplManager.Render(promptID, req.Variables)
+	kind, data, err := service.RenderPrompt(promptID, req.Variables)
 	if err != nil {
-		if err == utils.ErrTemplateNotFound {
-			c.JSON(http.StatusNotFound, gin.H{
-				"error": "prompt template not found",
-			})
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "failed to render template",
-			})
-		}
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to render template",
+		})
 		return
 	}
+	if kind == "prompt" {
+		c.JSON(http.StatusOK, gin.H{
+			"kind":   kind,
+			"prompt": data,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"kind":     kind,
+			"messages": data,
+		})
+	}
+}
 
-	c.JSON(http.StatusOK, gin.H{
-		"rendered_prompt": result,
-		"status":          "success",
-	})
+type ChatModelRequest struct {
+	Model     string                 `json:"model"`
+	Variables map[string]interface{} `json:"variables"`
 }
 
 // ChatWithPrompt 使用Prompt与LLM聊天
@@ -132,8 +117,8 @@ func RenderPrompt(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param prompt_id path string true "Prompt模板ID"
-// @Param request body service.ChatModelParameters true "聊天参数"
-// @Success 200 {object} service.ChatModelResponse
+// @Param request body ChatModelRequest true "聊天参数"
+// @Success 200 {object} service.ChatResponse
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -141,7 +126,7 @@ func RenderPrompt(c *gin.Context) {
 func ChatWithPrompt(c *gin.Context) {
 	promptID := c.Param("prompt_id")
 
-	var req service.ChatModelParameters
+	var req ChatModelRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "invalid request body",

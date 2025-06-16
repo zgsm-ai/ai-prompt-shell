@@ -9,19 +9,23 @@ import (
 	"time"
 )
 
-func Init(c *config.RefreshConfig) error {
+var llmClient *LLMClient
+
+func Init(c *config.Config) error {
 	if dao.Client == nil {
 		return utils.ErrRedisError
 	}
+	llmClient = NewLLMClient(c.LLM.ApiBase, c.LLM.ApiKey)
+
 	cache.LoadFromRedis(context.Background())
 	registry.LoadFromRedis(context.Background())
 	env.LoadFromRedis(context.Background())
 	prompts.LoadFromRedis(context.Background())
 
-	startAutoRefreshTools(c.Tool)
-	startAutoRefreshPrompts(c.Prompt)
-	startAutoRefreshExtensions(c.Extension)
-	startAutoRefreshEnvirionments(c.Environ)
+	startAutoRefreshTools(c.Refresh.Tool)
+	startAutoRefreshPrompts(c.Refresh.Prompt)
+	startAutoRefreshExtensions(c.Refresh.Extension)
+	startAutoRefreshEnvirionments(c.Refresh.Environ)
 	return nil
 }
 
@@ -52,7 +56,7 @@ func startAutoRefreshPrompts(interval time.Duration) {
 			prompts.LoadFromRedis(context.Background())
 			onRefreshPrompts()
 			// case <-c.refreshChannel:
-			// 收到手动刷新信号
+			// Receives manual refresh signal
 		}
 	}
 }
@@ -94,7 +98,7 @@ func startAutoRefreshEnvirionments(interval time.Duration) {
 		case <-ticker.C:
 			env.LoadFromRedis(context.Background())
 			// case <-c.refreshChannel:
-			// 收到手动刷新信号
+			// Receives manual refresh signal
 		}
 	}
 }

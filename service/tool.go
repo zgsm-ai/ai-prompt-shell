@@ -48,18 +48,14 @@ func ToolIDs() ([]string, error) {
 	return results, nil
 }
 
-func Call(ctx context.Context, toolId string, args map[string]interface{}) (interface{}, error) {
-	tool, ok := registry.Get(toolId)
-	if !ok {
-		return nil, fmt.Errorf("tool not found: %s", toolId)
-	}
-	if err := utils.ValidateVariables(args, tool.Parameters); err != nil {
+func Call(ctx context.Context, t *dao.Tool, args []interface{}) (interface{}, error) {
+	if err := utils.ValidateArgs(args, t.Parameters); err != nil {
 		return nil, err
 	}
-	return callTool(ctx, tool, args)
+	return callTool(ctx, t, args)
 }
 
-func callTool(ctx context.Context, tool dao.Tool, args map[string]interface{}) (interface{}, error) {
+func callTool(ctx context.Context, tool *dao.Tool, args []interface{}) (interface{}, error) {
 	// 根据工具类型调用不同的执行逻辑
 	switch tool.Type {
 	case "restful":
@@ -73,7 +69,7 @@ func callTool(ctx context.Context, tool dao.Tool, args map[string]interface{}) (
 	}
 }
 
-func callRestfulTool(ctx context.Context, tool dao.Tool, params map[string]interface{}) (interface{}, error) {
+func callRestfulTool(ctx context.Context, tool *dao.Tool, args []interface{}) (interface{}, error) {
 	// 2. URL验证
 	if tool.URL == "" {
 		return nil, fmt.Errorf("missing URL for tool %s", tool.Name)
@@ -92,7 +88,7 @@ func callRestfulTool(ctx context.Context, tool dao.Tool, params map[string]inter
 
 	// 最多重试3次
 	for i := 0; i < 3; i++ {
-		reqBody, err := json.Marshal(params)
+		reqBody, err := json.Marshal(args)
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal request: %v", err)
 		}
@@ -138,7 +134,7 @@ func callRestfulTool(ctx context.Context, tool dao.Tool, params map[string]inter
 	return nil, fmt.Errorf("max retries reached for tool %s: %v", tool.Name, lastErr)
 }
 
-func callGRPCTool(ctx context.Context, tool dao.Tool, params map[string]interface{}) (interface{}, error) {
+func callGRPCTool(ctx context.Context, tool *dao.Tool, args []interface{}) (interface{}, error) {
 	// 2. URL验证
 	if tool.URL == "" {
 		return nil, fmt.Errorf("missing gRPC endpoint URL for tool %s", tool.Name)
@@ -164,7 +160,7 @@ func callGRPCTool(ctx context.Context, tool dao.Tool, params map[string]interfac
 		defer conn.Close()
 
 		// 4. 准备请求数据
-		reqBody, err := json.Marshal(params)
+		reqBody, err := json.Marshal(args)
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal request: %v", err)
 		}
@@ -217,7 +213,7 @@ func isUnavailable(err error) bool {
 	return status.Code(err) == codes.Unavailable
 }
 
-func callMCPTool(ctx context.Context, tool dao.Tool, params map[string]interface{}) (interface{}, error) {
+func callMCPTool(ctx context.Context, tool *dao.Tool, args []interface{}) (interface{}, error) {
 	// 简单实现，实际项目中应该通过MCP客户端调用
 	return nil, fmt.Errorf("MCP tool not implemented yet")
 }

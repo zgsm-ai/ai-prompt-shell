@@ -83,7 +83,7 @@
                   "additionalProperties": false
                 }
               },
-              "userPrompt": {
+              "prompt": {
                 "type": "string",
                 "description": "用户提示词模板"
               },

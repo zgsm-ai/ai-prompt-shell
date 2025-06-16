@@ -465,7 +465,7 @@
                         "type": "string"
                     }
                 },
-                "userPrompt": {
+                "prompt": {
                     "type": "string"
                 }
             }

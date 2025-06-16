@@ -471,7 +471,7 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "userPrompt": {
+                "prompt": {
                     "type": "string"
                 }
             }
