@@ -1,0 +1,362 @@
+basePath: /
+definitions:
+  dao.Contributes:
+    properties:
+      dependences:
+        items:
+          $ref: '#/definitions/dao.Dependence'
+        type: array
+      languages:
+        items:
+          type: string
+        type: array
+      prompts:
+        items:
+          $ref: '#/definitions/dao.Prompt'
+        type: array
+    type: object
+  dao.Dependence:
+    properties:
+      failStrategy:
+        type: string
+      name:
+        type: string
+      version:
+        type: string
+    type: object
+  dao.Engines:
+    properties:
+      name:
+        type: string
+      version:
+        type: string
+    type: object
+  dao.Message:
+    properties:
+      content:
+        type: string
+      role:
+        type: string
+    type: object
+  dao.Prompt:
+    properties:
+      description:
+        type: string
+      messages:
+        items:
+          $ref: '#/definitions/dao.Message'
+        type: array
+      name:
+        type: string
+      parameters:
+        additionalProperties: true
+        type: object
+      returns:
+        additionalProperties: true
+        type: object
+      supports:
+        items:
+          type: string
+        type: array
+      userPrompt:
+        type: string
+    type: object
+  dao.PromptExtension:
+    properties:
+      contributes:
+        $ref: '#/definitions/dao.Contributes'
+      description:
+        type: string
+      displayName:
+        type: string
+      engines:
+        $ref: '#/definitions/dao.Engines'
+      extensionType:
+        type: string
+      icon:
+        type: string
+      license:
+        type: string
+      name:
+        type: string
+      publisher:
+        type: string
+      version:
+        type: string
+    type: object
+  dao.Tool:
+    properties:
+      description:
+        type: string
+      module:
+        type: string
+      name:
+        type: string
+      parameters:
+        additionalProperties: true
+        type: object
+      returns:
+        additionalProperties: true
+        type: object
+      supports:
+        items:
+          type: string
+        type: array
+      type:
+        type: string
+      url:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is the API documentation for AI Prompt Shell
+  title: AI Prompt Shell API
+  version: "1.0"
+paths:
+  /api/chat/prompts/{prompt_id}:
+    post:
+      consumes:
+      - application/json
+      description: 使用指定的Prompt模板与LLM进行聊天交互
+      parameters:
+      - description: Prompt模板ID
+        in: path
+        name: prompt_id
+        required: true
+        type: string
+      - description: 聊天参数
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 使用Prompt与LLM交互
+      tags:
+      - Chat
+  /api/environs:
+    get:
+      description: 获取系统中定义的所有环境变量
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      summary: 列出所有环境变量
+      tags:
+      - Environs
+  /api/environs/{environ_id}:
+    get:
+      description: 获取指定环境变量的值
+      parameters:
+      - description: 环境变量ID
+        in: path
+        name: environ_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: 获取环境变量
+      tags:
+      - Environs
+  /api/extensions:
+    get:
+      description: 获取系统中可用的所有Prompt类型扩展的ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      summary: 获取所有Prompt类型扩展的ID
+      tags:
+      - Extensions
+  /api/extensions/{extension_id}:
+    get:
+      description: 根据ID获取Prompt类型扩展的详细信息
+      parameters:
+      - description: 扩展ID
+        in: path
+        name: extension_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dao.PromptExtension'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取指定Prompt类型扩展详情
+      tags:
+      - Extensions
+  /api/prompts:
+    get:
+      description: 获取系统中可用的所有Prompt模板列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      summary: 获取所有Prompt模板
+      tags:
+      - Prompts
+  /api/prompts/{prompt_id}:
+    get:
+      description: 根据ID获取Prompt模板的详细信息
+      parameters:
+      - description: Prompt模板ID
+        in: path
+        name: prompt_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 获取指定Prompt模板详情
+      tags:
+      - Prompts
+  /api/render/prompts/{prompt_id}:
+    post:
+      consumes:
+      - application/json
+      description: 使用给定变量渲染指定的Prompt模板
+      parameters:
+      - description: Prompt模板ID
+        in: path
+        name: prompt_id
+        required: true
+        type: string
+      - description: 渲染参数
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 渲染指定Prompt模板
+      tags:
+      - Render
+  /api/tools:
+    get:
+      description: 获取系统中所有可用工具列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      summary: 列出所有工具
+      tags:
+      - Tools
+  /api/tools/{tool_id}:
+    get:
+      description: 获取指定工具的详细信息
+      parameters:
+      - description: 工具ID
+        in: path
+        name: tool_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dao.Tool'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 获取工具详情
+      tags:
+      - Tools
+swagger: "2.0"

@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "module": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["restful", "grpc", "mcp"]
+    },
+    "url": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "supports": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["chat", "completion", "codereview"]
+      }
+    },
+    "parameters": {
+      "$ref": "http://json-schema.org/draft-07/schema#"
+    },
+    "returns": {
+      "$ref": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  "required": [
+    "name",
+    "module",
+    "type",
+    "url",
+    "description",
+    "supports",
+    "parameters",
+    "returns"
+  ]
+}

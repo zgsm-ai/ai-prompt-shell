@@ -1,0 +1,55 @@
+{
+  "name": "evaluator",
+  "publisher": "zgsm-ai",
+  "displayName": "项目质量评估器",
+  "icon": "images/evaluator.png",
+  "description": "评估项目代码的质量，给出各个质量维度的评估报告",
+  "version": "1.0.0",
+  "extensionType": "prompt",
+  "license": "Apache-2.0",
+  "engines": {
+    "name": "ai-prompt-shell",
+    "version": ">=1.0.0"
+  },
+  "contributes": {
+    "prompts": [
+      {
+        "name": "evaluate_quality",
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a code review assistant who can evaluate the quality of the project."
+          },
+          {
+            "role": "user",
+            "content": "Evaluate the project code from the following dimensions and give a quality assessment report.\nEvaluation dimensions:\n{{.vscode.rules}}\nCode context:\n{{.codebase.current_project}}"
+          }
+        ],
+        "support_scenes": [
+          "chat",
+          "codereview"
+        ],
+        "parameters": {
+          "type": "object"
+        },
+        "returns": {
+          "type": "string",
+          "description": "评估报告"
+        }
+      }
+    ],
+    "languages": ["c++", "c", "lua", "python"],
+    "dependences": [
+      {
+        "name": "scan-gitrepo",
+        "version": "^1.0.0",
+        "failStrategy": "abort"
+      },
+      {
+        "name": "context",
+        "version": "^1.2.0",
+        "failStrategy": "ignore"
+      }
+    ]
+  }
+}
