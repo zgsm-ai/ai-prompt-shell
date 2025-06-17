@@ -15,9 +15,181 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/chat/prompts/{prompt_id}": {
+        "/api/environs": {
+            "get": {
+                "description": "Get all defined environment variables in system",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Environs"
+                ],
+                "summary": "List all environment variables",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/environs/{environ_id}": {
+            "get": {
+                "description": "Get value of specified environment variable",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Environs"
+                ],
+                "summary": "Get environment variable",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment variable ID",
+                        "name": "environ_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/api/extensions": {
+            "get": {
+                "description": "Get all available prompt extension IDs in the system",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Extensions"
+                ],
+                "summary": "List all prompt extension IDs",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/extensions/{extension_id}": {
+            "get": {
+                "description": "Get detailed information of prompt extension by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Extensions"
+                ],
+                "summary": "Get specified prompt extension details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Extension ID",
+                        "name": "extension_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dao.PromptExtension"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/prompts": {
+            "get": {
+                "description": "Get all available prompt templates in the system",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Prompts"
+                ],
+                "summary": "List all prompt templates",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/prompts/{prompt_id}": {
+            "get": {
+                "description": "Get detailed information of prompt template by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Prompts"
+                ],
+                "summary": "Get specified prompt template details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Prompt template ID",
+                        "name": "prompt_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dao.Prompt"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/prompts/{prompt_id}/chat": {
             "post": {
-                "description": "使用指定的Prompt模板与LLM进行聊天交互",
+                "description": "Chat interaction with LLM using specified prompt template",
                 "consumes": [
                     "application/json"
                 ],
@@ -25,25 +197,24 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Chat"
+                    "Prompts"
                 ],
-                "summary": "使用Prompt与LLM交互",
+                "summary": "Interact with LLM using prompt",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Prompt模板ID",
+                        "description": "Prompt template ID",
                         "name": "prompt_id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "聊天参数",
+                        "description": "Chat parameters",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/api.ChatModelRequest"
                         }
                     }
                 ],
@@ -51,8 +222,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/service.ChatResponse"
                         }
                     },
                     "400": {
@@ -79,186 +249,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/environs": {
-            "get": {
-                "description": "获取系统中定义的所有环境变量",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Environs"
-                ],
-                "summary": "列出所有环境变量",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/environs/{environ_id}": {
-            "get": {
-                "description": "获取指定环境变量的值",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Environs"
-                ],
-                "summary": "获取环境变量",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "环境变量ID",
-                        "name": "environ_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/extensions": {
-            "get": {
-                "description": "获取系统中可用的所有Prompt类型扩展的ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Extensions"
-                ],
-                "summary": "获取所有Prompt类型扩展的ID",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/extensions/{extension_id}": {
-            "get": {
-                "description": "根据ID获取Prompt类型扩展的详细信息",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Extensions"
-                ],
-                "summary": "获取指定Prompt类型扩展详情",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "扩展ID",
-                        "name": "extension_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dao.PromptExtension"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/api/prompts": {
-            "get": {
-                "description": "获取系统中可用的所有Prompt模板列表",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Prompts"
-                ],
-                "summary": "获取所有Prompt模板",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/prompts/{prompt_id}": {
-            "get": {
-                "description": "根据ID获取Prompt模板的详细信息",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Prompts"
-                ],
-                "summary": "获取指定Prompt模板详情",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Prompt模板ID",
-                        "name": "prompt_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/api/render/prompts/{prompt_id}": {
+        "/api/prompts/{prompt_id}/render": {
             "post": {
-                "description": "使用给定变量渲染指定的Prompt模板",
+                "description": "Render the prompt template with given args",
                 "consumes": [
                     "application/json"
                 ],
@@ -266,19 +259,19 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Render"
+                    "Prompts"
                 ],
-                "summary": "渲染指定Prompt模板",
+                "summary": "Render specified prompt template",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Prompt模板ID",
+                        "description": "Prompt template ID",
                         "name": "prompt_id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "渲染参数",
+                        "description": "Rendering parameters",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -322,14 +315,14 @@ const docTemplate = `{
         },
         "/api/tools": {
             "get": {
-                "description": "获取系统中所有可用工具列表",
+                "description": "Get a list of all available tools in the system",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Tools"
                 ],
-                "summary": "列出所有工具",
+                "summary": "List all tools",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -345,14 +338,14 @@ const docTemplate = `{
         },
         "/api/tools/{tool_id}": {
             "get": {
-                "description": "获取指定工具的详细信息",
+                "description": "Get detailed information about specified tool",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Tools"
                 ],
-                "summary": "获取工具详情",
+                "summary": "Get tool details",
                 "parameters": [
                     {
                         "type": "string",
@@ -383,6 +376,18 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "api.ChatModelRequest": {
+            "type": "object",
+            "properties": {
+                "model": {
+                    "type": "string"
+                },
+                "args": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            }
+        },
         "dao.Contributes": {
             "type": "object",
             "properties": {
@@ -431,6 +436,17 @@ const docTemplate = `{
                 }
             }
         },
+        "dao.Grpc": {
+            "type": "object",
+            "properties": {
+                "method": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "dao.Message": {
             "type": "object",
             "properties": {
@@ -461,6 +477,9 @@ const docTemplate = `{
                     "type": "object",
                     "additionalProperties": true
                 },
+                "prompt": {
+                    "type": "string"
+                },
                 "returns": {
                     "type": "object",
                     "additionalProperties": true
@@ -470,9 +489,6 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                },
-                "prompt": {
-                    "type": "string"
                 }
             }
         },
@@ -511,11 +527,31 @@ const docTemplate = `{
                 }
             }
         },
+        "dao.Restful": {
+            "type": "object",
+            "properties": {
+                "method": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "dao.Tool": {
             "type": "object",
             "properties": {
                 "description": {
                     "type": "string"
+                },
+                "examples": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "grpc": {
+                    "$ref": "#/definitions/dao.Grpc"
                 },
                 "module": {
                     "type": "string"
@@ -526,6 +562,9 @@ const docTemplate = `{
                 "parameters": {
                     "type": "object",
                     "additionalProperties": true
+                },
+                "restful": {
+                    "$ref": "#/definitions/dao.Restful"
                 },
                 "returns": {
                     "type": "object",
@@ -539,9 +578,65 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "string"
+                }
+            }
+        },
+        "service.ChatResponse": {
+            "type": "object",
+            "properties": {
+                "choices": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "finish_reason": {
+                                "type": "string"
+                            },
+                            "index": {
+                                "type": "integer"
+                            },
+                            "logprobs": {
+                                "type": "object"
+                            },
+                            "message": {
+                                "type": "object",
+                                "properties": {
+                                    "content": {
+                                        "type": "string"
+                                    },
+                                    "role": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
                 },
-                "url": {
+                "created": {
+                    "type": "integer"
+                },
+                "id": {
                     "type": "string"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "object": {
+                    "type": "string"
+                },
+                "usage": {
+                    "type": "object",
+                    "properties": {
+                        "completion_tokens": {
+                            "type": "integer"
+                        },
+                        "prompt_tokens": {
+                            "type": "integer"
+                        },
+                        "total_tokens": {
+                            "type": "integer"
+                        }
+                    }
                 }
             }
         }

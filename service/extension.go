@@ -5,25 +5,29 @@ import (
 	"context"
 )
 
-var cache = dao.NewExtensionCache()
+var extensions = dao.NewExtensionCache()
 
-func Extensions() (map[string]dao.PromptExtension, error) {
-	if err := cache.LoadFromRedis(context.Background()); err != nil {
-		return nil, err
-	}
-	return cache.All(), nil
-}
-
+/**
+ * Get extension by ID from cache
+ * @param extension_id ID of the extension to retrieve
+ * @return extension content if found
+ * @return bool indicating if extension exists
+ */
 func Extension(extension_id string) (dao.PromptExtension, bool) {
-	return cache.Get(extension_id)
+	return extensions.Get(extension_id)
 }
 
+/**
+ * Get all available extension IDs
+ * @return slice of extension IDs
+ * @return error if failed to load from Redis
+ */
 func ExtensionIDs() ([]string, error) {
-	if err := cache.LoadFromRedis(context.Background()); err != nil {
+	if err := extensions.LoadFromRedis(context.Background()); err != nil {
 		return nil, err
 	}
 	var result []string
-	for k, _ := range cache.All() {
+	for k, _ := range extensions.All() {
 		result = append(result, k)
 	}
 	return result, nil

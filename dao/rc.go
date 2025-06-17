@@ -16,11 +16,11 @@ var (
 )
 
 /**
- * Initialize Redis client
- * @param {string} addr - Redis server address
- * @param {string} password - Redis password
- * @param {number} db - Redis database number
- * @returns {error} Error if connection fails
+ * Initialize Redis client connection
+ * @param addr Redis server address
+ * @param password Redis auth password
+ * @param db Redis database number
+ * @return Error if connection fails
  */
 func InitRedis(addr, password string, db int) error {
 	Client = redis.NewClient(&redis.Options{
@@ -40,11 +40,11 @@ func InitRedis(addr, password string, db int) error {
 }
 
 /**
- * Set JSON data to Redis
- * @param {string} key - Redis key
- * @param {any} value - Value to be stored as JSON
- * @param {Duration} expiration - Key expiration time
- * @returns {error} Error if operation fails
+ * Set JSON encoded value in Redis
+ * @param key Redis key
+ * @param value Value to be stored
+ * @param expiration Key expiration duration
+ * @return Error if operation fails
  */
 func SetJSON(key string, value any, expiration time.Duration) error {
 	data, err := json.Marshal(value)
@@ -55,10 +55,10 @@ func SetJSON(key string, value any, expiration time.Duration) error {
 }
 
 /**
- * Get JSON data from Redis
- * @param {string} key - Redis key
- * @param {any} dest - Destination object to store data
- * @returns {error} Error if operation fails or key not found
+ * Get JSON decoded value from Redis
+ * @param key Redis key
+ * @param dest Destination object to store data
+ * @return Error if operation fails
  */
 func GetJSON(key string, dest any) error {
 	data, err := Client.Get(Ctx, key).Bytes()
@@ -73,8 +73,8 @@ func GetJSON(key string, dest any) error {
 
 /**
  * Delete key from Redis
- * @param {string} key - Redis key to delete
- * @returns {error} Error if operation fails
+ * @param key Redis key to delete
+ * @return Error if operation fails
  */
 func Del(key string) error {
 	return Client.Del(Ctx, key).Err()
@@ -82,9 +82,9 @@ func Del(key string) error {
 
 /**
  * Check if key exists in Redis
- * @param {string} key - Redis key to check
- * @returns {boolean} Whether key exists
- * @returns {error} Error if operation fails
+ * @param key Redis key to check
+ * @return exists Whether key exists
+ * @return Error if operation fails
  */
 func Exists(key string) (bool, error) {
 	n, err := Client.Exists(Ctx, key).Result()
@@ -92,10 +92,10 @@ func Exists(key string) (bool, error) {
 }
 
 /**
- * Get all matching keys by prefix pattern
- * @param {string} prefix - Key prefix pattern
- * @returns {[]string} List of matching keys
- * @returns {error} Error if scan operation fails
+ * Find keys matching prefix pattern
+ * @param prefix Key prefix pattern
+ * @return Matching keys list
+ * @return Error if operation fails
  */
 func KeysByPrefix(prefix string) ([]string, error) {
 	var keys []string
@@ -121,10 +121,10 @@ func KeysByPrefix(prefix string) ([]string, error) {
 }
 
 /**
- * Load all key-value pairs under specified prefix in Redis
- * @param {string} prefix - Key prefix pattern
- * @returns {Object} Map of key-value pairs
- * @returns {error} Error if operation fails
+ * Load all JSON values under prefix from Redis
+ * @param prefix Key prefix pattern
+ * @return Map of key-value pairs
+ * @return Error if operation fails
  */
 func LoadJsons(prefix string) (map[string]interface{}, error) {
 	keys, err := KeysByPrefix(prefix)

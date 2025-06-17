@@ -6,28 +6,46 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Config 应用全局配置
+/**
+ * Main application configuration struct
+ * Includes all subsystem configurations
+ */
 type Config struct {
-	AppName  string        `mapstructure:"APP_NAME"`
-	LogLevel string        `mapstructure:"LOG_LEVEL"`
-	Server   ServerConfig  `mapstructure:"SERVER"`
-	Redis    RedisConfig   `mapstructure:"REDIS"`
-	Refresh  RefreshConfig `mapstructure:"REFRESH"`
-	LLM      LLMConfig     `mapstructure:"LLM"`
+	AppName string        `mapstructure:"APP_NAME"`
+	Server  ServerConfig  `mapstructure:"SERVER"`
+	Logger  LoggerConfig  `mapstructure:"LOGGER"`
+	Redis   RedisConfig   `mapstructure:"REDIS"`
+	Refresh RefreshConfig `mapstructure:"REFRESH"`
+	LLM     LLMConfig     `mapstructure:"LLM"`
 }
 
+type LoggerConfig struct {
+	LogLevel    string `mapstructure:"LEVEL"`
+	LogFormat   string `mapstructure:"FORMAT"`
+	LogOutput   string `mapstructure:"OUTPUT"`
+	LogFileName string `mapstructure:"FILE_NAME"`
+}
+
+/**
+ * Server related configuration
+ */
 type ServerConfig struct {
 	ListenAddr string `mapstructure:"LISTEN_ADDR"`
 	Debug      bool   `mapstructure:"DEBUG"`
 }
 
-// RedisConfig Redis连接配置
+/**
+ * Redis connection configuration
+ */
 type RedisConfig struct {
 	Addr     string `mapstructure:"ADDR"`
 	Password string `mapstructure:"PASSWORD"`
 	DB       int    `mapstructure:"DB"`
 }
 
+/**
+ * Auto-refresh intervals configuration
+ */
 type RefreshConfig struct {
 	Tool      time.Duration `mapstructure:"TOOL"`
 	Extension time.Duration `mapstructure:"EXTENSION"`
@@ -35,6 +53,9 @@ type RefreshConfig struct {
 	Environ   time.Duration `mapstructure:"ENVIRON"`
 }
 
+/**
+ * LLM API configuration
+ */
 type LLMConfig struct {
 	ApiKey  string `mapstructure:"API_KEY"`
 	ApiBase string `mapstructure:"API_BASE"`
@@ -42,7 +63,10 @@ type LLMConfig struct {
 
 var cfg *Config
 
-// Load 加载配置
+/**
+ * Load and parse configuration from file/environment
+ * @return Pointer to config instance
+ */
 func Load() *Config {
 	if cfg != nil {
 		return cfg

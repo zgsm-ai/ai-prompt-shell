@@ -9,9 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ListPrompts 列出所有Prompt模板
-// @Summary 获取所有Prompt模板
-// @Description 获取系统中可用的所有Prompt模板列表
+// ListPrompts list all prompt templates
+// @Summary List all prompt templates
+// @Description Get all available prompt templates in the system
 // @Tags Prompts
 // @Produce json
 // @Success 200 {array} string
@@ -19,86 +19,76 @@ import (
 func ListPrompts(c *gin.Context) {
 	templates, err := service.PromptIDs()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "failed to load templates",
-		})
+		respErrorf(c, http.StatusInternalServerError, "failed to load templates")
 		return
 	}
-	c.JSON(http.StatusOK, templates)
+	respOK(c, templates)
 }
 
-// GetPromptDetail 获取Prompt模板详情
-// @Summary 获取指定Prompt模板详情
-// @Description 根据ID获取Prompt模板的详细信息
+// GetPromptDetail get prompt template details
+// @Summary Get specified prompt template details
+// @Description Get detailed information of prompt template by ID
 // @Tags Prompts
 // @Produce json
-// @Param prompt_id path string true "Prompt模板ID"
-// @Success 200 {object} map[string]interface{}
+// @Param prompt_id path string true "Prompt template ID"
+// @Success 200 {object} dao.Prompt
 // @Failure 404 {object} map[string]interface{}
 // @Router /api/prompts/{prompt_id} [get]
 func GetPromptDetail(c *gin.Context) {
 	promptID := c.Param("prompt_id")
 
 	if dao.Client == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "failed to connect redis",
-		})
+		respErrorf(c, http.StatusInternalServerError, "failed to connect redis")
 		return
 	}
 	prompt, origin := service.Prompt(promptID)
 	if origin == dao.PromptOrigin_Notexist {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "template not found",
-		})
+		respErrorf(c, http.StatusNotFound, "template not found")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	respOK(c, gin.H{
 		"origin": string(origin),
 		"prompt": prompt,
 	})
 }
 
-// RenderPrompt 渲染Prompt模板
-// @Summary 渲染指定Prompt模板
-// @Description 使用给定变量渲染指定的Prompt模板
-// @Tags Render
+// RenderPrompt render prompt template
+// @Summary Render specified prompt template
+// @Description Render the prompt template with given args
+// @Tags Prompts
 // @Accept json
 // @Produce json
-// @Param prompt_id path string true "Prompt模板ID"
-// @Param request body map[string]interface{} true "渲染参数"
+// @Param prompt_id path string true "Prompt template ID"
+// @Param request body map[string]interface{} true "Rendering parameters"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
-// @Router /api/render/prompts/{prompt_id} [post]
+// @Router /api/prompts/{prompt_id}/render [post]
 func RenderPrompt(c *gin.Context) {
 	promptID := c.Param("prompt_id")
 	var req struct {
-		Variables map[string]interface{} `json:"variables"`
+		Args map[string]interface{} `json:"args"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid request body",
-		})
+		respErrorf(c, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
-	kind, data, err := service.RenderPrompt(promptID, req.Variables)
+	kind, data, err := service.RenderPrompt(promptID, req.Args)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "failed to render template",
-		})
+		respErrorf(c, http.StatusInternalServerError, "failed to render template")
 		return
 	}
 	if kind == "prompt" {
-		c.JSON(http.StatusOK, gin.H{
+		respOK(c, gin.H{
 			"kind":   kind,
 			"prompt": data,
 		})
 	} else {
-		c.JSON(http.StatusOK, gin.H{
+		respOK(c, gin.H{
 			"kind":     kind,
 			"messages": data,
 		})
@@ -106,39 +96,35 @@ func RenderPrompt(c *gin.Context) {
 }
 
 type ChatModelRequest struct {
-	Model     string                 `json:"model"`
-	Variables map[string]interface{} `json:"variables"`
+	Model string                 `json:"model"`
+	Args  map[string]interface{} `json:"args"`
 }
 
-// ChatWithPrompt 使用Prompt与LLM聊天
-// @Summary 使用Prompt与LLM交互
-// @Description 使用指定的Prompt模板与LLM进行聊天交互
-// @Tags Chat
+// ChatWithPrompt chat with LLM using prompt
+// @Summary Interact with LLM using prompt
+// @Description Chat interaction with LLM using specified prompt template
+// @Tags Prompts
 // @Accept json
 // @Produce json
-// @Param prompt_id path string true "Prompt模板ID"
-// @Param request body ChatModelRequest true "聊天参数"
+// @Param prompt_id path string true "Prompt template ID"
+// @Param request body ChatModelRequest true "Chat parameters"
 // @Success 200 {object} service.ChatResponse
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
-// @Router /api/chat/prompts/{prompt_id} [post]
+// @Router /api/prompts/{prompt_id}/chat [post]
 func ChatWithPrompt(c *gin.Context) {
 	promptID := c.Param("prompt_id")
 
 	var req ChatModelRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid request body",
-		})
+		respErrorf(c, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
-	resp, err := service.ChatWithPrompt(promptID, req.Model, req.Variables)
+	resp, err := service.ChatWithPrompt(promptID, req.Model, req.Args)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		respError(c, http.StatusBadRequest, err)
 		return
 	}
 

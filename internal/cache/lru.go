@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-// LRUCache 实现简单的LRU缓存
+// LRUCache implements simple LRU cache
 type LRUCache struct {
 	size   int
 	list   *list.List
@@ -18,6 +18,11 @@ type cacheEntry struct {
 	value interface{}
 }
 
+/**
+ * Create new LRU cache instance
+ * @param size Maximum number of entries in cache
+ * @return New LRUCache instance
+ */
 func NewLRUCache(size int) *LRUCache {
 	return &LRUCache{
 		size:   size,
@@ -26,6 +31,12 @@ func NewLRUCache(size int) *LRUCache {
 	}
 }
 
+/**
+ * Get value from cache by key
+ * @param c LRUCache instance
+ * @param key Lookup key
+ * @return Value and existence flag
+ */
 func (c *LRUCache) Get(key string) (interface{}, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -37,20 +48,27 @@ func (c *LRUCache) Get(key string) (interface{}, bool) {
 	return nil, false
 }
 
+/**
+ * Add or update value in cache
+ * @param c LRUCache instance
+ * @param key Entry key
+ * @param value Entry value
+ * Will evict least recently used item if cache is full
+ */
 func (c *LRUCache) Put(key string, value interface{}) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	if elem, ok := c.values[key]; ok {
-		// 更新现有值
+		// Update existing value
 		elem.Value.(*cacheEntry).value = value
 		c.list.MoveToFront(elem)
 		return
 	}
 
-	// 添加新元素
+	// Add new element
 	if c.list.Len() >= c.size {
-		// 淘汰最久未使用的元素
+		// Evict least recently used element
 		lastElem := c.list.Back()
 		if lastElem != nil {
 			delete(c.values, lastElem.Value.(*cacheEntry).key)

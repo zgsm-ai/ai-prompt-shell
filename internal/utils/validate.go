@@ -7,25 +7,30 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-// ValidateVariables 根据 JSON schema 验证 variables 是否合法
+/**
+ * Validate variables against JSON schema
+ * @param variables Map of variables to validate
+ * @param schema JSON schema definition
+ * @return Error if validation fails
+ */
 func ValidateVariables(variables map[string]interface{}, schema interface{}) error {
-	// 将输入 variables 转换为 JSON 文档
+	// Convert input variables to JSON document
 	variablesJSON, err := json.Marshal(variables)
 	if err != nil {
 		return fmt.Errorf("failed to marshal variables: %w", err)
 	}
 
-	// 将 schema 转换为 JSON 文档
+	// Convert schema to JSON document
 	schemaJSON, err := json.Marshal(schema)
 	if err != nil {
 		return fmt.Errorf("failed to marshal schema: %w", err)
 	}
 
-	// 加载 schema
+	// Load schema
 	schemaLoader := gojsonschema.NewBytesLoader(schemaJSON)
 	documentLoader := gojsonschema.NewBytesLoader(variablesJSON)
 
-	// 执行验证
+	// Perform validation
 	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
 	if err != nil {
 		return fmt.Errorf("validation error: %w", err)
@@ -42,24 +47,30 @@ func ValidateVariables(variables map[string]interface{}, schema interface{}) err
 	return nil
 }
 
+/**
+ * Validate arguments array against JSON schema
+ * @param args Arguments array to validate
+ * @param schema JSON schema definition
+ * @return Error if validation fails
+ */
 func ValidateArgs(args []interface{}, schema interface{}) error {
-	// 将输入 variables 转换为 JSON 文档
+	// Convert input args to JSON document
 	variablesJSON, err := json.Marshal(args)
 	if err != nil {
-		return fmt.Errorf("failed to marshal variables: %w", err)
+		return fmt.Errorf("failed to marshal args: %w", err)
 	}
 
-	// 将 schema 转换为 JSON 文档
+	// Convert schema to JSON document
 	schemaJSON, err := json.Marshal(schema)
 	if err != nil {
 		return fmt.Errorf("failed to marshal schema: %w", err)
 	}
 
-	// 加载 schema
+	// Load schema
 	schemaLoader := gojsonschema.NewBytesLoader(schemaJSON)
 	documentLoader := gojsonschema.NewBytesLoader(variablesJSON)
 
-	// 执行验证
+	// Perform validation
 	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
 	if err != nil {
 		return fmt.Errorf("validation error: %w", err)
@@ -70,7 +81,7 @@ func ValidateArgs(args []interface{}, schema interface{}) error {
 		for _, desc := range result.Errors() {
 			errs = append(errs, desc.String())
 		}
-		return fmt.Errorf("invalid variables: %v", errs)
+		return fmt.Errorf("invalid args: %v", errs)
 	}
 
 	return nil

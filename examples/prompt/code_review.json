@@ -1,0 +1,57 @@
+{
+    "name": "code_review",
+    "description": "代码评审助手",
+    "messages": [
+        {
+            "role": "system",
+            "content": "你是一个代码评审助手，可以分析代码质量并提供改进建议"
+        },
+        {
+            "role": "user",
+            "content": "请分析这段代码的质量:\n```{{.args.language}}\n{{.args.code}}\n```"
+        }
+    ],
+    "supports": ["chat", "codereview"],
+    "parameters": {
+        "code": {
+            "type": "string",
+            "description": "需要分析的代码"
+        },
+        "language": {
+            "type": "string",
+            "description": "代码语言"
+        }
+    },
+    "returns": {
+        "type": "object",
+        "properties": {
+            "score": {
+                "type": "number",
+                "description": "代码质量评分(1-10)"
+            },
+            "issues": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/definitions/codeIssue"
+                }
+            }
+        },
+        "definitions": {
+            "codeIssue": {
+                "type": "object",
+                "properties": {
+                    "severity": {
+                        "type": "string",
+                        "enum": ["low", "medium", "high"]
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "location": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}

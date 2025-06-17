@@ -16,7 +16,7 @@ type LLMClient struct {
 	httpClient *http.Client
 }
 
-// ChatRequest 定义聊天补全请求结构
+// ChatRequest defines chat completion request structure
 type ChatRequest struct {
 	Model    string        `json:"model"`
 	Messages []dao.Message `json:"messages"`
@@ -44,6 +44,12 @@ type ChatResponse struct {
 	} `json:"usage"`
 }
 
+/**
+ * Create new LLM client instance
+ * @param baseURL base URL for LLM API endpoint
+ * @param apiKey authentication key for API access
+ * @return initialized LLM client instance
+ */
 func NewLLMClient(baseURL, apiKey string) *LLMClient {
 	return &LLMClient{
 		baseURL: baseURL,
@@ -54,7 +60,13 @@ func NewLLMClient(baseURL, apiKey string) *LLMClient {
 	}
 }
 
-// ChatCompletion 调用LLM进行聊天补全
+/**
+ * Execute chat completion using LLM API
+ * @param ctx context for request cancellation
+ * @param req chat request containing model and messages
+ * @return chat completion response from LLM
+ * @return error if API call fails
+ */
 func (c *LLMClient) ChatCompletion(ctx context.Context, req ChatRequest) (ChatResponse, error) {
 	reqBody, err := json.Marshal(req)
 	if err != nil {

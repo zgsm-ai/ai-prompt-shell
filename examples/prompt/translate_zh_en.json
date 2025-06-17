@@ -1,0 +1,24 @@
+{
+    "name": "evaluate_quality",
+    "messages": [
+        {
+        "role": "system",
+        "content": "You are a code review assistant who can evaluate the quality of the project."
+        },
+        {
+        "role": "user",
+        "content": "Evaluate the project code from the following dimensions and give a quality assessment report.\nEvaluation dimensions:\n{{.vscode.rules}}\nCode context:\n{{.codebase.current_project}}"
+        }
+    ],
+    "supports": [
+        "chat",
+        "codereview"
+    ],
+    "parameters": {
+        "type": "object"
+    },
+    "returns": {
+        "type": "string",
+        "description": "评估报告"
+    }
+}

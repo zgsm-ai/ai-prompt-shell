@@ -11,7 +11,7 @@
 | 框架名 | 说明 |
 |---|---|
 | gin | 轻量级web框架 |
-| gorm | 轻量级ORM框架 |
+| gorm | 轻量级ORM框架 | 
 | github.com/go-redis/redis/v8 | 键值数据库,可用作缓存及消息队列 |
 | logrus |  日志 |
 | spf13/viper | 配置文件 |
@@ -28,19 +28,19 @@ RESTful API实现函数，采用swagger注释标准进行注释，保证能生�
 范例：
 
 ```go
-// RenderPrompt 渲染Prompt模板
-// @Summary 渲染Prompt模板
-// @Description 根据Prompt ID获取模板，使用输入变量渲染生成最终Prompt
+// RenderPrompt render prompt template
+// @Summary Render prompt template
+// @Description Get prompt template by ID and render with input args
 // @Tags Render
 // @Accept json
-// @Produce json
-// @Param prompt_id path string true "Prompt模板ID"
-// @Param variables body string false "模板变量" SchemaExample({"variables":{"text":"单例模式实现"}})
-// @Success 200 {object} map[string]interface{} "渲染结果"
-// @Failure 400 {object} map[string]interface{} "请求参数错误"
-// @Failure 404 {object} map[string]interface{} "模板不存在"
-// @Failure 500 {object} map[string]interface{} "渲染失败"
-// @Router /api/render/prompts/{prompt_id} [post]
+// @Produce json 
+// @Param prompt_id path string true "Prompt template ID"
+// @Param args body string false "Template args" SchemaExample({"args":{"text":"Singleton pattern implementation"}})
+// @Success 200 {object} map[string]interface{} "Rendered result"
+// @Failure 400 {object} map[string]interface{} "Invalid parameters"
+// @Failure 404 {object} map[string]interface{} "Template not found"
+// @Failure 500 {object} map[string]interface{} "Render failed"
+// @Router /api/prompts/{prompt_id}/render [post]
 func (pc *PromptController) RenderPrompt(c *gin.Context) {
 }
 ```
@@ -51,19 +51,19 @@ func (pc *PromptController) RenderPrompt(c *gin.Context) {
 
 ```go
 /**
- * 上传文件到服务器
- * @param {string} serverPath - 文件在服务器上的目标存储路径
- * @param {*resource.AI_File} file - 要上传的文件对象，包含文件大小(Size)等元数据
- * @returns {error} 返回错误对象，成功时返回nil
+ * Upload file to server
+ * @param {string} serverPath - Target storage path on server
+ * @param {*resource.AI_File} file - File object to upload, contains metadata like Size
+ * @returns {error} Returns error object, nil on success
  * @description
- * - 自动处理文件大小：小文件直接上传，大文件(>DEF_PART_SIZE)调用PostHugeFile
- * - 设置HTTP请求头部：Content-Type、Cookie和Accept
- * - 处理服务器响应并更新上传进度条
+ * - Auto handles file size: small files upload directly, large files(>DEF_PART_SIZE) call PostHugeFile
+ * - Sets HTTP headers: Content-Type, Cookie and Accept
+ * - Processes server response and updates progress bar
  * @throws
- * - 文件流转失败(createFileBuffer错误)
- * - POST请求创建失败(http.NewRequest错误)
- * - HTTP请求发送错误(client.Do错误)
- * - 服务器返回非200状态码(statusToError)
+ * - File stream error (createFileBuffer)
+ * - POST request creation failure (http.NewRequest)
+ * - HTTP request error (client.Do)
+ * - Non-200 status code (statusToError)
  * @example
  * err := session.PostFile("/upload/path", file)
  * if err != nil {
@@ -102,4 +102,3 @@ func (ss *AI_Session) PostFile(serverPath string, file *resource.AI_File) error 
 业务层放在services目录下；
 机制层放在internal目录下；
 数据IO层放在dao目录下；
-

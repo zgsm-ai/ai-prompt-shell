@@ -1,0 +1,27 @@
+{
+  "name": "lookup_reference",
+  "module": "codebase",
+  "type": "restful",
+  "restful": {
+    "url": "https://zgsm.sangfor.com/codebase/api/lookup_reference",
+    "method": "GET"
+  },
+  "description": "This is a tool to find all functions that reference the current symbol",
+  "supports": ["chat", "completion"],
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "input": {
+        "type": "string"
+      }
+    }
+  },
+  "returns": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "type": "string"
+      }
+    }
+  }
+}

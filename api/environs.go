@@ -7,9 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ListEnvirons 获取环境变量列表
-// @Summary 列出所有环境变量
-// @Description 获取系统中定义的所有环境变量
+// ListEnvirons Get environment variables list
+// @Summary List all environment variables
+// @Description Get all defined environment variables in system
 // @Tags Environs
 // @Produce json
 // @Success 200 {object} []string
@@ -17,27 +17,27 @@ import (
 func ListEnvirons(c *gin.Context) {
 	envs, err := service.Environments().Keys()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "加载环境变量失败"})
+		respErrorf(c, http.StatusInternalServerError, "Failed to load environment variables")
 		return
 	}
-	c.JSON(http.StatusOK, envs)
+	respOK(c, envs)
 }
 
-// GetEnviron 获取单个环境变量的值
-// @Summary 获取环境变量
-// @Description 获取指定环境变量的值
+// GetEnviron Get a single environment variable value
+// @Summary Get environment variable
+// @Description Get value of specified environment variable
 // @Tags Environs
 // @Produce json
-// @Param environ_id path string true "环境变量ID"
-// @Success 200 {object} string
-// @Failure 404 {object} string
+// @Param environ_id path string true "Environment variable ID"
+// @Success 200 {object} interface{}
+// @Failure 404 {object} interface{}
 // @Router /api/environs/{environ_id} [get]
 func GetEnviron(c *gin.Context) {
 	environID := c.Param("environ_id")
 	val, ok := service.Environments().Get(environID)
 	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "环境变量不存在"})
+		respErrorf(c, http.StatusNotFound, "Environment variable not found")
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"value": val})
+	respOK(c, val)
 }

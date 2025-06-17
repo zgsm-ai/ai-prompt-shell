@@ -1,5 +1,13 @@
 basePath: /
 definitions:
+  api.ChatModelRequest:
+    properties:
+      model:
+        type: string
+      args:
+        additionalProperties: true
+        type: object
+    type: object
   dao.Contributes:
     properties:
       dependences:
@@ -31,6 +39,13 @@ definitions:
       version:
         type: string
     type: object
+  dao.Grpc:
+    properties:
+      method:
+        type: string
+      url:
+        type: string
+    type: object
   dao.Message:
     properties:
       content:
@@ -51,6 +66,8 @@ definitions:
       parameters:
         additionalProperties: true
         type: object
+      prompt:
+        type: string
       returns:
         additionalProperties: true
         type: object
@@ -58,8 +75,6 @@ definitions:
         items:
           type: string
         type: array
-      prompt:
-        type: string
     type: object
   dao.PromptExtension:
     properties:
@@ -84,10 +99,23 @@ definitions:
       version:
         type: string
     type: object
+  dao.Restful:
+    properties:
+      method:
+        type: string
+      url:
+        type: string
+    type: object
   dao.Tool:
     properties:
       description:
         type: string
+      examples:
+        items:
+          type: string
+        type: array
+      grpc:
+        $ref: '#/definitions/dao.Grpc'
       module:
         type: string
       name:
@@ -95,6 +123,8 @@ definitions:
       parameters:
         additionalProperties: true
         type: object
+      restful:
+        $ref: '#/definitions/dao.Restful'
       returns:
         additionalProperties: true
         type: object
@@ -104,8 +134,44 @@ definitions:
         type: array
       type:
         type: string
-      url:
+    type: object
+  service.ChatResponse:
+    properties:
+      choices:
+        items:
+          properties:
+            finish_reason:
+              type: string
+            index:
+              type: integer
+            logprobs:
+              type: object
+            message:
+              properties:
+                content:
+                  type: string
+                role:
+                  type: string
+              type: object
+          type: object
+        type: array
+      created:
+        type: integer
+      id:
         type: string
+      model:
+        type: string
+      object:
+        type: string
+      usage:
+        properties:
+          completion_tokens:
+            type: integer
+          prompt_tokens:
+            type: integer
+          total_tokens:
+            type: integer
+        type: object
     type: object
 host: localhost:8080
 info:
@@ -114,53 +180,9 @@ info:
   title: AI Prompt Shell API
   version: "1.0"
 paths:
-  /api/chat/prompts/{prompt_id}:
-    post:
-      consumes:
-      - application/json
-      description: 使用指定的Prompt模板与LLM进行聊天交互
-      parameters:
-      - description: Prompt模板ID
-        in: path
-        name: prompt_id
-        required: true
-        type: string
-      - description: 聊天参数
-        in: body
-        name: request
-        required: true
-        schema:
-          additionalProperties: true
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: 使用Prompt与LLM交互
-      tags:
-      - Chat
   /api/environs:
     get:
-      description: 获取系统中定义的所有环境变量
+      description: Get all defined environment variables in system
       produces:
       - application/json
       responses:
@@ -170,14 +192,14 @@ paths:
             items:
               type: string
             type: array
-      summary: 列出所有环境变量
+      summary: List all environment variables
       tags:
       - Environs
   /api/environs/{environ_id}:
     get:
-      description: 获取指定环境变量的值
+      description: Get value of specified environment variable
       parameters:
-      - description: 环境变量ID
+      - description: Environment variable ID
         in: path
         name: environ_id
         required: true
@@ -187,18 +209,16 @@ paths:
       responses:
         "200":
           description: OK
-          schema:
-            type: string
+          schema: {}
         "404":
           description: Not Found
-          schema:
-            type: string
-      summary: 获取环境变量
+          schema: {}
+      summary: Get environment variable
       tags:
       - Environs
   /api/extensions:
     get:
-      description: 获取系统中可用的所有Prompt类型扩展的ID
+      description: Get all available prompt extension IDs in the system
       produces:
       - application/json
       responses:
@@ -208,14 +228,14 @@ paths:
             items:
               type: string
             type: array
-      summary: 获取所有Prompt类型扩展的ID
+      summary: List all prompt extension IDs
       tags:
       - Extensions
   /api/extensions/{extension_id}:
     get:
-      description: 根据ID获取Prompt类型扩展的详细信息
+      description: Get detailed information of prompt extension by ID
       parameters:
-      - description: 扩展ID
+      - description: Extension ID
         in: path
         name: extension_id
         required: true
@@ -232,12 +252,12 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: 获取指定Prompt类型扩展详情
+      summary: Get specified prompt extension details
       tags:
       - Extensions
   /api/prompts:
     get:
-      description: 获取系统中可用的所有Prompt模板列表
+      description: Get all available prompt templates in the system
       produces:
       - application/json
       responses:
@@ -247,14 +267,14 @@ paths:
             items:
               type: string
             type: array
-      summary: 获取所有Prompt模板
+      summary: List all prompt templates
       tags:
       - Prompts
   /api/prompts/{prompt_id}:
     get:
-      description: 根据ID获取Prompt模板的详细信息
+      description: Get detailed information of prompt template by ID
       parameters:
-      - description: Prompt模板ID
+      - description: Prompt template ID
         in: path
         name: prompt_id
         required: true
@@ -265,6 +285,42 @@ paths:
         "200":
           description: OK
           schema:
+            $ref: '#/definitions/dao.Prompt'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get specified prompt template details
+      tags:
+      - Prompts
+  /api/prompts/{prompt_id}/chat:
+    post:
+      consumes:
+      - application/json
+      description: Chat interaction with LLM using specified prompt template
+      parameters:
+      - description: Prompt template ID
+        in: path
+        name: prompt_id
+        required: true
+        type: string
+      - description: Chat parameters
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.ChatModelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.ChatResponse'
+        "400":
+          description: Bad Request
+          schema:
             additionalProperties: true
             type: object
         "404":
@@ -272,21 +328,26 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: 获取指定Prompt模板详情
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Interact with LLM using prompt
       tags:
       - Prompts
-  /api/render/prompts/{prompt_id}:
+  /api/prompts/{prompt_id}/render:
     post:
       consumes:
       - application/json
-      description: 使用给定变量渲染指定的Prompt模板
+      description: Render the prompt template with given args
       parameters:
-      - description: Prompt模板ID
+      - description: Prompt template ID
         in: path
         name: prompt_id
         required: true
         type: string
-      - description: 渲染参数
+      - description: Rendering parameters
         in: body
         name: request
         required: true
@@ -316,12 +377,12 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: 渲染指定Prompt模板
+      summary: Render specified prompt template
       tags:
-      - Render
+      - Prompts
   /api/tools:
     get:
-      description: 获取系统中所有可用工具列表
+      description: Get a list of all available tools in the system
       produces:
       - application/json
       responses:
@@ -331,12 +392,12 @@ paths:
             items:
               type: string
             type: array
-      summary: 列出所有工具
+      summary: List all tools
       tags:
       - Tools
   /api/tools/{tool_id}:
     get:
-      description: 获取指定工具的详细信息
+      description: Get detailed information about specified tool
       parameters:
       - description: 工具ID
         in: path
@@ -356,7 +417,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: 获取工具详情
+      summary: Get tool details
       tags:
       - Tools
 swagger: "2.0"

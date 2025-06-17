@@ -1,16 +1,17 @@
 package dao
 
-// Tool 定义了工具的元数据结构
+// Tool defines metadata structure for tools
 type Tool struct {
 	Name        string                 `json:"name"`
 	Module      string                 `json:"module"`
 	Type        string                 `json:"type"`
-	URL         string                 `json:"url"`
 	Description string                 `json:"description"`
 	Supports    []string               `json:"supports"`
 	Parameters  map[string]interface{} `json:"parameters"`
 	Returns     map[string]interface{} `json:"returns"`
-	Examples    []string               `json:"examples"`
+	Examples    []string               `json:"examples,omitempty"`
+	Restful     *Restful               `json:"restful,omitempty"`
+	Grpc        *Grpc                  `json:"grpc,omitempty"`
 }
 
 type Restful struct {
@@ -19,12 +20,12 @@ type Restful struct {
 }
 
 type Grpc struct {
-	Service string `json:"service"`
-	Method  string `json:"method"`
+	Url    string `json:"url"`
+	Method string `json:"method"`
 }
 
-// ValidToolTypes 定义了有效的工具类型枚举
+// ValidToolTypes defines valid tool type enums
 var ValidToolTypes = []string{"restful", "grpc", "mcp"}
 
-// ValidSupportTypes 定义了有效的支持类型枚举
+// ValidSupportTypes defines valid support type enums
 var ValidSupportTypes = []string{"chat", "completion", "codereview"}

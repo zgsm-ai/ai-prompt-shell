@@ -25,7 +25,7 @@
             "content": "Evaluate the project code from the following dimensions and give a quality assessment report.\nEvaluation dimensions:\n{{.vscode.rules}}\nCode context:\n{{.codebase.current_project}}"
           }
         ],
-        "support_scenes": [
+        "supports": [
           "chat",
           "codereview"
         ],

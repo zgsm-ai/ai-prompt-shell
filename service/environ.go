@@ -4,8 +4,12 @@ import (
 	"ai-prompt-shell/dao"
 )
 
-var env = dao.NewEnvironments()
+var environs = dao.NewEnvironments()
 
+/**
+ * Get environment variables manager
+ * @return pointer to environments instance
+ */
 func Environments() *dao.Environments {
-	return env
+	return environs
 }

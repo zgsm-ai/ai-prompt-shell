@@ -7,5 +7,5 @@ func KeyToPath(key, prefix string) string {
 }
 
 func KeyToID(key, prefix string) string {
-	return strings.ReplaceAll(strings.TrimPrefix(key, prefix), ":", "_")
+	return strings.ReplaceAll(strings.TrimPrefix(key, prefix), ":", ".")
 }

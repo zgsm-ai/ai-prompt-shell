@@ -2,13 +2,14 @@ package api
 
 import (
 	"ai-prompt-shell/service"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-// ListTools 列出所有可用工具
-// @Summary 列出所有工具
-// @Description 获取系统中所有可用工具列表
+// ListTools list all available tools
+// @Summary List all tools
+// @Description Get a list of all available tools in the system
 // @Tags Tools
 // @Produce json
 // @Success 200 {array} string
@@ -16,17 +17,15 @@ import (
 func ListTools(c *gin.Context) {
 	tools, err := service.ToolIDs()
 	if err != nil {
-		c.JSON(500, gin.H{
-			"error": "获取工具列表失败",
-		})
+		respError(c, http.StatusBadGateway, err)
 		return
 	}
-	c.JSON(200, tools)
+	respOK(c, tools)
 }
 
-// GetToolDetail 获取工具详情
-// @Summary 获取工具详情
-// @Description 获取指定工具的详细信息
+// GetToolDetail get tool details
+// @Summary Get tool details
+// @Description Get detailed information about specified tool
 // @Tags Tools
 // @Produce json
 // @Param tool_id path string true "工具ID"
@@ -38,11 +37,9 @@ func GetToolDetail(c *gin.Context) {
 
 	toolDetail, err := service.GetTool(toolID)
 	if err != nil {
-		c.JSON(404, gin.H{
-			"error": "工具不存在",
-		})
+		respError(c, http.StatusBadGateway, err)
 		return
 	}
 
-	c.JSON(200, toolDetail)
+	respOK(c, toolDetail)
 }

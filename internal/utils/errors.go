@@ -11,6 +11,9 @@ var (
 	ErrToolCallFailed   = errors.New("tool call failed")
 )
 
+/**
+ * Redis operation error wrapper
+ */
 type RedisError struct {
 	Operation string
 	Key       string

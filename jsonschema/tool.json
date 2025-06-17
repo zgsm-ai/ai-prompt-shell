@@ -12,8 +12,28 @@
       "type": "string",
       "enum": ["restful", "grpc", "mcp"]
     },
-    "url": {
-      "type": "string"
+    "restful": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string",
+          "enum": ["GET", "POST", "PUT", "DELETE"]
+        }
+      }
+    },
+    "grpc": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        }
+      }
     },
     "description": {
       "type": "string"
@@ -36,7 +56,6 @@
     "name",
     "module",
     "type",
-    "url",
     "description",
     "supports",
     "parameters",

@@ -17,19 +17,19 @@ import (
 	_ "ai-prompt-shell/docs"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
 	cfg := config.Load()
-	logger.Init(cfg.LogLevel)
-	log := logger.GetLogger()
+	logger.Init(&cfg.Logger)
 
 	err := dao.InitRedis(cfg.Redis.Addr, cfg.Redis.Password, cfg.Redis.DB)
 	if err != nil {
-		log.Fatalf("Redis initialization failed: %v", err)
+		logrus.Fatalf("Redis initialization failed: %v", err)
 	}
 	if err := service.Init(cfg); err != nil {
-		log.Fatalf("Service initialization failed: %v", err)
+		logrus.Fatalf("Service initialization failed: %v", err)
 	}
 	runHttpServer(&cfg.Server)
 }
