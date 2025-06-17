@@ -47,7 +47,8 @@ smc variable set "completion.model" -v "deepseek-codelite-v3"
 6. 调用ai-prompt-shell提供的接口，使用指定Prompt模板与LLM交互
 
 ```shell
-ai-prompt-shell -p "translator.translate_zh_en" -i "你好，世界"
+smc prompt render "agent.code_review" -v "{\"language\": \"cpp\", \"code\": \"int main(){\n}\"}"
+smc prompt chat "agent.code_review" -m "deepseek-v3" -v "{\"language\": \"cpp\", \"code\": \"int main(){\n}\"}"
 ```
 
 ## 示例
