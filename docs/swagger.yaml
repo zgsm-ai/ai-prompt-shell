@@ -1,12 +1,31 @@
 basePath: /
 definitions:
-  api.ChatModelRequest:
+  api.RenderPromptRequest:
     properties:
-      model:
-        type: string
       args:
         additionalProperties: true
         type: object
+    type: object
+  api.RenderPromptResponse:
+    properties:
+      kind:
+        type: string
+      messages:
+        items:
+          $ref: '#/definitions/dao.Message'
+        type: array
+      prompt:
+        type: string
+    type: object
+  api.ResponseData:
+    properties:
+      code:
+        type: string
+      data: {}
+      message:
+        type: string
+      success:
+        type: boolean
     type: object
   dao.Contributes:
     properties:
@@ -135,6 +154,34 @@ definitions:
       type:
         type: string
     type: object
+  service.ChatPromptRequest:
+    properties:
+      args:
+        additionalProperties: true
+        type: object
+      frequency_penalty:
+        type: number
+      max_tokens:
+        type: integer
+      model:
+        type: string
+      "n":
+        type: integer
+      presence_penalty:
+        type: number
+      stop:
+        items:
+          type: string
+        type: array
+      stream:
+        type: boolean
+      temperature:
+        type: number
+      top_p:
+        type: number
+      user:
+        type: string
+    type: object
   service.ChatResponse:
     properties:
       choices:
@@ -212,7 +259,8 @@ paths:
           schema: {}
         "404":
           description: Not Found
-          schema: {}
+          schema:
+            $ref: '#/definitions/api.ResponseData'
       summary: Get environment variable
       tags:
       - Environs
@@ -250,8 +298,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/api.ResponseData'
       summary: Get specified prompt extension details
       tags:
       - Extensions
@@ -289,8 +336,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/api.ResponseData'
       summary: Get specified prompt template details
       tags:
       - Prompts
@@ -310,7 +356,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/api.ChatModelRequest'
+          $ref: '#/definitions/service.ChatPromptRequest'
       produces:
       - application/json
       responses:
@@ -321,18 +367,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/api.ResponseData'
         "404":
           description: Not Found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/api.ResponseData'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/api.ResponseData'
       summary: Interact with LLM using prompt
       tags:
       - Prompts
@@ -352,31 +395,26 @@ paths:
         name: request
         required: true
         schema:
-          additionalProperties: true
-          type: object
+          $ref: '#/definitions/api.RenderPromptRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/api.RenderPromptResponse'
         "400":
           description: Bad Request
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/api.ResponseData'
         "404":
           description: Not Found
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/api.ResponseData'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/api.ResponseData'
       summary: Render specified prompt template
       tags:
       - Prompts
@@ -414,9 +452,7 @@ paths:
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/api.ResponseData'
       summary: Get tool details
       tags:
       - Tools

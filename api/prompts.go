@@ -32,7 +32,7 @@ func ListPrompts(c *gin.Context) {
 // @Produce json
 // @Param prompt_id path string true "Prompt template ID"
 // @Success 200 {object} dao.Prompt
-// @Failure 404 {object} map[string]interface{}
+// @Failure 404 {object} ResponseData
 // @Router /api/prompts/{prompt_id} [get]
 func GetPromptDetail(c *gin.Context) {
 	promptID := c.Param("prompt_id")
@@ -53,6 +53,16 @@ func GetPromptDetail(c *gin.Context) {
 	})
 }
 
+type RenderPromptRequest struct {
+	Args map[string]interface{} `json:"args"`
+}
+
+type RenderPromptResponse struct {
+	Kind     string        `json:"kind"`
+	Prompt   string        `json:"prompt,omitempty"`
+	Messages []dao.Message `json:"messages,omitempty"`
+}
+
 // RenderPrompt render prompt template
 // @Summary Render specified prompt template
 // @Description Render the prompt template with given args
@@ -60,18 +70,16 @@ func GetPromptDetail(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param prompt_id path string true "Prompt template ID"
-// @Param request body map[string]interface{} true "Rendering parameters"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Param request body RenderPromptRequest true "Rendering parameters"
+// @Success 200 {object} RenderPromptResponse
+// @Failure 400 {object} ResponseData
+// @Failure 404 {object} ResponseData
+// @Failure 500 {object} ResponseData
 // @Router /api/prompts/{prompt_id}/render [post]
 func RenderPrompt(c *gin.Context) {
 	promptID := c.Param("prompt_id")
-	var req struct {
-		Args map[string]interface{} `json:"args"`
-	}
 
+	var req RenderPromptRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		respErrorf(c, http.StatusBadRequest, "invalid request body")
 		return
@@ -83,21 +91,16 @@ func RenderPrompt(c *gin.Context) {
 		return
 	}
 	if kind == "prompt" {
-		respOK(c, gin.H{
-			"kind":   kind,
-			"prompt": data,
+		respOK(c, RenderPromptResponse{
+			Kind:   kind,
+			Prompt: data.(string),
 		})
 	} else {
-		respOK(c, gin.H{
-			"kind":     kind,
-			"messages": data,
+		respOK(c, RenderPromptResponse{
+			Kind:     kind,
+			Messages: data.([]dao.Message),
 		})
 	}
-}
-
-type ChatModelRequest struct {
-	Model string                 `json:"model"`
-	Args  map[string]interface{} `json:"args"`
 }
 
 // ChatWithPrompt chat with LLM using prompt
@@ -107,24 +110,24 @@ type ChatModelRequest struct {
 // @Accept json
 // @Produce json
 // @Param prompt_id path string true "Prompt template ID"
-// @Param request body ChatModelRequest true "Chat parameters"
+// @Param request body service.ChatPromptRequest true "Chat parameters"
 // @Success 200 {object} service.ChatResponse
-// @Failure 400 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
+// @Failure 400 {object} ResponseData
+// @Failure 404 {object} ResponseData
+// @Failure 500 {object} ResponseData
 // @Router /api/prompts/{prompt_id}/chat [post]
 func ChatWithPrompt(c *gin.Context) {
 	promptID := c.Param("prompt_id")
 
-	var req ChatModelRequest
+	var req service.ChatPromptRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		respErrorf(c, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
-	resp, err := service.ChatWithPrompt(promptID, req.Model, req.Args)
+	resp, err := service.ChatWithPrompt(promptID, req)
 	if err != nil {
-		respError(c, http.StatusBadRequest, err)
+		respError(c, http.StatusInternalServerError, err)
 		return
 	}
 

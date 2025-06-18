@@ -5,48 +5,76 @@ import (
 	"context"
 )
 
+type ChatPromptRequest struct {
+	Model            string                 `json:"model"`
+	Args             map[string]interface{} `json:"args"`
+	Temperature      float64                `json:"temperature,omitempty"`
+	MaxTokens        int                    `json:"max_tokens,omitempty"`
+	TopP             float64                `json:"top_p,omitempty"`
+	FrequencyPenalty float64                `json:"frequency_penalty,omitempty"`
+	PresencePenalty  float64                `json:"presence_penalty,omitempty"`
+	Stop             []string               `json:"stop,omitempty"`
+	N                int                    `json:"n,omitempty"`
+	Stream           bool                   `json:"stream,omitempty"`
+	User             string                 `json:"user,omitempty"`
+}
+
 /**
- * Execute chat completion with specified prompt template
+ * ChatWithPrompt executes chat completion using specified prompt template
  * @param promptId ID of the prompt template to use
- * @param model LLM model to use for completion
- * @param args args to substitute into the prompt
- * @return chat response containing completion results
- * @return error if template rendering or LLM call fails
+ * @param req chat request parameters containing:
+ *      - Model: LLM model to use
+ *      - Args: template parameter substitutions
+ *      - Temperature: controls randomness of generation
+ *      - MaxTokens: maximum tokens to generate
+ *      - Other advanced LLM parameters
+ * @return ChatResponse containing generated chat response
+ * @return error possible errors include:
+ *      - prompt template rendering failure
+ *      - LLM service call failure
+ *      - parameter validation failure
+ * Implementation flow:
+ * 1. Render prompt template using promptId and Args
+ * 2. Construct LLM request parameters
+ * 3. Call LLM service to get completion results
  */
-func ChatWithPrompt(promptId string, model string, args map[string]interface{}) (ChatResponse, error) {
+func ChatWithPrompt(promptId string, req ChatPromptRequest) (ChatResponse, error) {
 	var resp ChatResponse
-	// 1. Render template
-	kind, data, err := RenderPrompt(promptId, args)
+	// Render template
+	kind, data, err := RenderPrompt(promptId, req.Args)
 	if err != nil {
 		return resp, err
 	}
 
-	// 3. Call LLM (Retry 2 times)
-	var lastErr error
-	var llmReq ChatRequest
-
+	// Call LLM
+	var llmReq ChatRequest = ChatRequest{
+		Model:            req.Model,
+		Temperature:      req.Temperature,
+		MaxTokens:        req.MaxTokens,
+		TopP:             req.TopP,
+		FrequencyPenalty: req.FrequencyPenalty,
+		PresencePenalty:  req.PresencePenalty,
+		Stop:             req.Stop,
+		N:                req.N,
+		Stream:           req.Stream,
+		User:             req.User,
+	}
 	if kind == "prompt" {
-		llmReq = ChatRequest{
-			Model: model,
-			Messages: []dao.Message{
-				{
-					Role:    "user",
-					Content: data.(string),
-				},
+		llmReq.Messages = []dao.Message{
+			{
+				Role:    "system",
+				Content: "You are a helpful assistant.",
+			},
+			{
+				Role:    "user",
+				Content: data.(string),
 			},
 		}
 	} else {
-		llmReq = ChatRequest{
-			Model:    model,
-			Messages: data.([]dao.Message),
-		}
+		llmReq.Messages = data.([]dao.Message)
 	}
 
-	resp, lastErr = llmClient.ChatCompletion(context.Background(), llmReq)
-
-	if lastErr != nil {
-		return resp, lastErr
-	}
+	resp, err = llmClient.ChatCompletion(context.Background(), llmReq)
 	//TODO:
-	return resp, nil
+	return resp, err
 }

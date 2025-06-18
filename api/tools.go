@@ -17,7 +17,7 @@ import (
 func ListTools(c *gin.Context) {
 	tools, err := service.ToolIDs()
 	if err != nil {
-		respError(c, http.StatusBadGateway, err)
+		respError(c, http.StatusInternalServerError, err)
 		return
 	}
 	respOK(c, tools)
@@ -30,14 +30,14 @@ func ListTools(c *gin.Context) {
 // @Produce json
 // @Param tool_id path string true "工具ID"
 // @Success 200 {object} dao.Tool
-// @Failure 404 {object} map[string]string
+// @Failure 404 {object} ResponseData
 // @Router /api/tools/{tool_id} [get]
 func GetToolDetail(c *gin.Context) {
 	toolID := c.Param("tool_id")
 
 	toolDetail, err := service.GetTool(toolID)
 	if err != nil {
-		respError(c, http.StatusBadGateway, err)
+		respError(c, http.StatusInternalServerError, err)
 		return
 	}
 

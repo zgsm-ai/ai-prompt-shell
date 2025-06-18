@@ -40,7 +40,7 @@ func respOK(c *gin.Context, data any) {
 func respError(c *gin.Context, code int, err error) {
 	logrus.Errorf("request: %+v, error: %s", c.Request.RequestURI, err.Error())
 	if httpErr, ok := err.(*utils.HttpError); ok {
-		c.JSON(code, ResponseData{
+		c.JSON(httpErr.Code(), ResponseData{
 			Code:    strconv.Itoa(httpErr.Code()),
 			Message: httpErr.Error(),
 			Success: false,

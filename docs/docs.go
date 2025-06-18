@@ -64,7 +64,9 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseData"
+                        }
                     }
                 }
             }
@@ -121,8 +123,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/api.ResponseData"
                         }
                     }
                 }
@@ -180,8 +181,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/api.ResponseData"
                         }
                     }
                 }
@@ -214,7 +214,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.ChatModelRequest"
+                            "$ref": "#/definitions/service.ChatPromptRequest"
                         }
                     }
                 ],
@@ -228,22 +228,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/api.ResponseData"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/api.ResponseData"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/api.ResponseData"
                         }
                     }
                 }
@@ -276,8 +273,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/api.RenderPromptRequest"
                         }
                     }
                 ],
@@ -285,29 +281,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/api.RenderPromptResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/api.ResponseData"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/api.ResponseData"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/api.ResponseData"
                         }
                     }
                 }
@@ -365,10 +357,7 @@ const docTemplate = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/api.ResponseData"
                         }
                     }
                 }
@@ -376,15 +365,44 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "api.ChatModelRequest": {
+        "api.RenderPromptRequest": {
             "type": "object",
             "properties": {
-                "model": {
-                    "type": "string"
-                },
                 "args": {
                     "type": "object",
                     "additionalProperties": true
+                }
+            }
+        },
+        "api.RenderPromptResponse": {
+            "type": "object",
+            "properties": {
+                "kind": {
+                    "type": "string"
+                },
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dao.Message"
+                    }
+                },
+                "prompt": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.ResponseData": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "data": {},
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
                 }
             }
         },
@@ -577,6 +595,48 @@ const docTemplate = `{
                     }
                 },
                 "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.ChatPromptRequest": {
+            "type": "object",
+            "properties": {
+                "args": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "frequency_penalty": {
+                    "type": "number"
+                },
+                "max_tokens": {
+                    "type": "integer"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "n": {
+                    "type": "integer"
+                },
+                "presence_penalty": {
+                    "type": "number"
+                },
+                "stop": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "stream": {
+                    "type": "boolean"
+                },
+                "temperature": {
+                    "type": "number"
+                },
+                "top_p": {
+                    "type": "number"
+                },
+                "user": {
                     "type": "string"
                 }
             }

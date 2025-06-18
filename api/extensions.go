@@ -30,7 +30,7 @@ func ListExtensions(c *gin.Context) {
 // @Produce json
 // @Param extension_id path string true "Extension ID"
 // @Success 200 {object} dao.PromptExtension
-// @Failure 404 {object} map[string]interface{}
+// @Failure 404 {object} ResponseData
 // @Router /api/extensions/{extension_id} [get]
 func GetExtensionDetail(c *gin.Context) {
 	extensionID := c.Param("extension_id")

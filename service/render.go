@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"net/http"
 	"strings"
 	"sync"
 	"text/template"
@@ -134,7 +133,7 @@ func onRefreshPrompts() {
 func renderTemplate(templateKey string, args map[string]interface{}) (string, error) {
 	t, ok := renderer.templates[templateKey]
 	if !ok {
-		return "", utils.ErrTemplateNotFound
+		return "", utils.ErrBug
 	}
 	var buf bytes.Buffer
 	err := t.Execute(&buf, constructContextData(args))
@@ -152,7 +151,7 @@ func renderTemplate(templateKey string, args map[string]interface{}) (string, er
  * @return fully rendered messages
  * @return error if rendering fails
  */
-func renderMessages(prompt_id string, messages []dao.Message, args map[string]interface{}) (interface{}, error) {
+func renderMessages(prompt_id string, messages []dao.Message, args map[string]interface{}) ([]dao.Message, error) {
 	var results []dao.Message
 	for i, message := range messages {
 		content, err := renderTemplate(fmt.Sprintf("%s.messages.%d", prompt_id, i), args)
@@ -178,7 +177,7 @@ func renderMessages(prompt_id string, messages []dao.Message, args map[string]in
 func RenderPrompt(prompt_id string, args map[string]interface{}) (string, interface{}, error) {
 	prompt, origin := prompts.Get(prompt_id)
 	if origin == dao.PromptOrigin_Notexist {
-		return "", "", utils.NewHttpError(http.StatusNotFound, "prompt not found")
+		return "", "", utils.ErrPromptNotFound
 	}
 	if prompt.Prompt != "" {
 		text, err := renderTemplate(prompt_id+".prompt", args)
@@ -187,5 +186,5 @@ func RenderPrompt(prompt_id string, args map[string]interface{}) (string, interf
 		messages, err := renderMessages(prompt_id, prompt.Messages, args)
 		return "messages", messages, err
 	}
-	return "", "", utils.ErrTemplateNotFound
+	return "", "", utils.ErrPromptInvalid
 }

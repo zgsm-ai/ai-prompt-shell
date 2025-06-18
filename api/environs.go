@@ -12,7 +12,7 @@ import (
 // @Description Get all defined environment variables in system
 // @Tags Environs
 // @Produce json
-// @Success 200 {object} []string
+// @Success 200 {array} string
 // @Router /api/environs [get]
 func ListEnvirons(c *gin.Context) {
 	envs, err := service.Environments().Keys()
@@ -30,7 +30,7 @@ func ListEnvirons(c *gin.Context) {
 // @Produce json
 // @Param environ_id path string true "Environment variable ID"
 // @Success 200 {object} interface{}
-// @Failure 404 {object} interface{}
+// @Failure 404 {object} ResponseData
 // @Router /api/environs/{environ_id} [get]
 func GetEnviron(c *gin.Context) {
 	environID := c.Param("environ_id")
