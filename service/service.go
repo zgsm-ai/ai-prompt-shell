@@ -1,9 +1,9 @@
 package service
 
 import (
-	"ai-prompt-shell/dao"
-	"ai-prompt-shell/internal/config"
-	"ai-prompt-shell/internal/utils"
+	"github.com/zgsm-ai/ai-prompt-shell/dao"
+	"github.com/zgsm-ai/ai-prompt-shell/internal/config"
+	"github.com/zgsm-ai/ai-prompt-shell/internal/utils"
 	"context"
 	"fmt"
 	"time"

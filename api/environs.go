@@ -1,7 +1,7 @@
 package api
 
 import (
-	"ai-prompt-shell/service"
+	"github.com/zgsm-ai/ai-prompt-shell/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

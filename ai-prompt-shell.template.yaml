@@ -5,32 +5,32 @@ metadata:
   namespace: shenma
 data:
   config.yaml: |
-    ENV: __env_profile
-    APP_NAME: "ai-prompt-shell"
-    LOGGER:
-      LEVEL: "debug"
-      FORMAT: "text"
-      OUTPUT: "stdout"
-      FILE_NAME: "ai-prompt-shell.log"
+    env: __env_profile
+    app_name: "ai-prompt-shell"
+    logger:
+      level: "debug"
+      format: "text"
+      output: "stdout"
+      file_name: "ai-prompt-shell.log"
 
-    SERVER:
-      LISTEN_ADDR: ":8080"
-      DEBUG: true
+    server:
+      listen_addr: ":8080"
+      debug: true
 
-    REDIS:
-      ADDR: "${{__env_profile.redis.addr}}"
-      PASSWORD: ""
-      DB: 0
+    redis:
+      addr: "${{__env_profile.redis.addr}}"
+      password: ""
+      db: 0
 
-    REFRESH:
-      TOOL: "5m"
-      EXTENSION: "5m"
-      PROMPT: "5m"
-      ENVIRON: "5m"
+    refresh:
+      tool: "5m"
+      extension: "5m"
+      prompt: "5m"
+      environ: "5m"
 
-    LLM:
-      API_KEY: ""
-      API_BASE: "${{__env_profile.llm.addr}}"
+    llm:
+      api_key: ""
+      api_base: "${{__env_profile.llm.addr}}"
 ---
 apiVersion: apps/v1
 kind: Deployment

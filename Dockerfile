@@ -17,12 +17,7 @@ FROM centos:7.6.1810
 ENV env prod
 ENV TZ Asia/Shanghai
 WORKDIR /
-# RUN curl -O http://10.72.1.16:30574/tools/kubectl
-# RUN chmod 777 kubectl
-# RUN mv kubectl /usr/bin/
-# RUN curl -O http://10.72.1.16:30574/tools/jq
-# RUN chmod 777 jq
-# RUN mv jq /usr/bin/
+
 COPY --from=builder /app/ai-prompt-shell /usr/local/bin
 RUN chmod 755 /usr/local/bin/ai-prompt-shell
 ENTRYPOINT ["/usr/local/bin/ai-prompt-shell"]

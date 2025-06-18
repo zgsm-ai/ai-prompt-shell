@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"ai-prompt-shell/internal/config"
+	"github.com/zgsm-ai/ai-prompt-shell/internal/config"
 	"os"
 
 	"github.com/sirupsen/logrus"

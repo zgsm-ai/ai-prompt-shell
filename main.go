@@ -1,26 +1,28 @@
 // @title AI Prompt Shell API
 // @version 1.0
 // @description This is the API documentation for AI Prompt Shell
-// @host localhost:8080
 // @BasePath /
 package main
 
 import (
-	"ai-prompt-shell/api"
-	"ai-prompt-shell/dao"
-	"ai-prompt-shell/internal/config"
-	"ai-prompt-shell/internal/logger"
-	"ai-prompt-shell/service"
+	"github.com/zgsm-ai/ai-prompt-shell/api"
+	"github.com/zgsm-ai/ai-prompt-shell/dao"
+	"github.com/zgsm-ai/ai-prompt-shell/internal/config"
+	"github.com/zgsm-ai/ai-prompt-shell/internal/logger"
+	"github.com/zgsm-ai/ai-prompt-shell/service"
+	"fmt"
 
 	"log"
 
-	_ "ai-prompt-shell/docs"
+	_ "github.com/zgsm-ai/ai-prompt-shell/docs"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
+	printVersions()
+
 	cfg := config.Load()
 	logger.Init(&cfg.Logger)
 
@@ -32,6 +34,21 @@ func main() {
 		logrus.Fatalf("Service initialization failed: %v", err)
 	}
 	runHttpServer(&cfg.Server)
+}
+
+var SoftwareVer = ""
+var BuildTime = ""
+var BuildTag = ""
+var BuildCommitId = ""
+
+/*
+ * Print software version information
+ */
+func printVersions() {
+	fmt.Printf("Version %s\n", SoftwareVer)
+	fmt.Printf("Build Time: %s\n", BuildTime)
+	fmt.Printf("Build Tag: %s\n", BuildTag)
+	fmt.Printf("Build Commit ID: %s\n", BuildCommitId)
 }
 
 /*

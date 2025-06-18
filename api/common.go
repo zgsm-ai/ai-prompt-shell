@@ -1,7 +1,7 @@
 package api
 
 import (
-	"ai-prompt-shell/internal/utils"
+	"github.com/zgsm-ai/ai-prompt-shell/internal/utils"
 	"fmt"
 	"net/http"
 	"strconv"

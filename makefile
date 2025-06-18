@@ -44,20 +44,21 @@ upload_dockerhub:
 # 上传镜像包到制品库和前置harbor
 upload: upload_dockerhub
 
+DEPLOY_YAML := "./__$(APP)_$(ENV)_$(VER).yaml"
 # 生成服务部署的YAML配置
-genyaml: 
-	shenma-secret.sh -d $(APP) -p $(ENV) -v $(VER) -t ./$(APP).template.yaml
+genyaml:
+	echo generate $(DEPLOY_YAML) ...
+	bash shenma-secret.sh -d $(APP) -p $(ENV) -v $(VER) -t ./$(APP).template.yaml
 
-# 应用生成的配置
 apply:
-	kubectl delete -f ./__$(APP)_$(ENV)_$(VER).yaml
-	kubectl apply -f ./__$(APP)_$(ENV)_$(VER).yaml
+	kubectl delete -f $(DEPLOY_YAML)
+	kubectl apply -f $(DEPLOY_YAML)
 
 k8s_clean:
-	kubectl delete -f ./__$(APP)_$(ENV)_$(VER).yaml
+	kubectl delete -f $(DEPLOY_YAML)
 
 k8s_create:
-	kubectl apply -f ./__$(APP)_$(ENV)_$(VER).yaml
+	kubectl apply -f $(DEPLOY_YAML)
 
 # 部署
 deploy: package upload genyaml apply

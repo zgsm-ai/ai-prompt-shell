@@ -3,8 +3,8 @@ package api
 import (
 	"net/http"
 
-	"ai-prompt-shell/dao"
-	"ai-prompt-shell/service"
+	"github.com/zgsm-ai/ai-prompt-shell/dao"
+	"github.com/zgsm-ai/ai-prompt-shell/service"
 
 	"github.com/gin-gonic/gin"
 )

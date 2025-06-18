@@ -1,7 +1,7 @@
 package service
 
 import (
-	"ai-prompt-shell/dao"
+	"github.com/zgsm-ai/ai-prompt-shell/dao"
 )
 
 var environs = dao.NewEnvironments()

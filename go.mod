@@ -1,4 +1,4 @@
-module ai-prompt-shell
+module github.com/zgsm-ai/ai-prompt-shell
 
 go 1.21
 

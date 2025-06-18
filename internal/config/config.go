@@ -11,54 +11,55 @@ import (
  * Includes all subsystem configurations
  */
 type Config struct {
-	AppName string        `mapstructure:"APP_NAME"`
-	Server  ServerConfig  `mapstructure:"SERVER"`
-	Logger  LoggerConfig  `mapstructure:"LOGGER"`
-	Redis   RedisConfig   `mapstructure:"REDIS"`
-	Refresh RefreshConfig `mapstructure:"REFRESH"`
-	LLM     LLMConfig     `mapstructure:"LLM"`
+	AppName string        `mapstructure:"app_name"`
+	Env     string        `mapstructure:"env"`
+	Server  ServerConfig  `mapstructure:"server"`
+	Logger  LoggerConfig  `mapstructure:"logger"`
+	Redis   RedisConfig   `mapstructure:"redis"`
+	Refresh RefreshConfig `mapstructure:"refresh"`
+	LLM     LLMConfig     `mapstructure:"llm"`
 }
 
 type LoggerConfig struct {
-	LogLevel    string `mapstructure:"LEVEL"`
-	LogFormat   string `mapstructure:"FORMAT"`
-	LogOutput   string `mapstructure:"OUTPUT"`
-	LogFileName string `mapstructure:"FILE_NAME"`
+	LogLevel    string `mapstructure:"level"`
+	LogFormat   string `mapstructure:"format"`
+	LogOutput   string `mapstructure:"output"`
+	LogFileName string `mapstructure:"file_name"`
 }
 
 /**
  * Server related configuration
  */
 type ServerConfig struct {
-	ListenAddr string `mapstructure:"LISTEN_ADDR"`
-	Debug      bool   `mapstructure:"DEBUG"`
+	ListenAddr string `mapstructure:"listen_addr"`
+	Debug      bool   `mapstructure:"debug"`
 }
 
 /**
  * Redis connection configuration
  */
 type RedisConfig struct {
-	Addr     string `mapstructure:"ADDR"`
-	Password string `mapstructure:"PASSWORD"`
-	DB       int    `mapstructure:"DB"`
+	Addr     string `mapstructure:"addr"`
+	Password string `mapstructure:"password"`
+	DB       int    `mapstructure:"db"`
 }
 
 /**
  * Auto-refresh intervals configuration
  */
 type RefreshConfig struct {
-	Tool      time.Duration `mapstructure:"TOOL"`
-	Extension time.Duration `mapstructure:"EXTENSION"`
-	Prompt    time.Duration `mapstructure:"PROMPT"`
-	Environ   time.Duration `mapstructure:"ENVIRON"`
+	Tool      time.Duration `mapstructure:"tool"`
+	Extension time.Duration `mapstructure:"extension"`
+	Prompt    time.Duration `mapstructure:"prompt"`
+	Environ   time.Duration `mapstructure:"environ"`
 }
 
 /**
  * LLM API configuration
  */
 type LLMConfig struct {
-	ApiKey  string `mapstructure:"API_KEY"`
-	ApiBase string `mapstructure:"API_BASE"`
+	ApiKey  string `mapstructure:"api_key"`
+	ApiBase string `mapstructure:"api_base"`
 }
 
 var cfg *Config
@@ -76,7 +77,6 @@ func Load() *Config {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
 	viper.AddConfigPath("./configs")
-	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
 		panic(err)
