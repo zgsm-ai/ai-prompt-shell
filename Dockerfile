@@ -12,7 +12,9 @@ RUN go env -w CGO_ENABLED=0 && \
 
 RUN go mod tidy && go build -o ai-prompt-shell *.go
 
-FROM centos:7.6.1810
+FROM alpine:3.21
+#FROM golang:1.21-alpine
+#FROM centos:7.6.1810
 #时区设置
 ENV env prod
 ENV TZ Asia/Shanghai
